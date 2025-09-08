@@ -10,6 +10,7 @@ interface DebuggerProps {
   };
   currentStep: number;
   floatingRef: React.RefObject<HTMLElement>;
+  isTourActive: boolean;
 }
 
 // Debugger Component
@@ -18,6 +19,7 @@ export const Debugger = ({
   floatingStyles,
   currentStep,
   floatingRef,
+  isTourActive,
 }: DebuggerProps) => {
   const [updateCount, setUpdateCount] = useState(0);
 
@@ -44,6 +46,9 @@ export const Debugger = ({
     >
       <div style={{ color: '#ffff00', fontSize: '14px', marginBottom: '10px' }}>
         🔍 Tour Debugger
+      </div>
+      <div style={{ marginBottom: '5px' }}>
+        <strong>Tour Active:</strong> {isTourActive ? '✅' : '❌'}
       </div>
       <div style={{ marginBottom: '5px' }}>
         <strong>Step:</strong> {currentStep}

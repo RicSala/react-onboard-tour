@@ -24,6 +24,13 @@ export const SmoothSpotlight: React.FC<SmoothSpotlightProps> = ({
   viewport,
   onClickOutside,
 }) => {
+  // Debug: Log when component mounts/unmounts
+  useEffect(() => {
+    console.log('SmoothSpotlight mounted');
+    return () => {
+      console.log('SmoothSpotlight unmounting');
+    };
+  }, []);
   const [position, setPosition] = useState(() => {
     if (!element) return { px: 0, py: 0, pw: 0, ph: 0 };
     const rect = element.getBoundingClientRect();
@@ -145,6 +152,7 @@ export const SmoothSpotlight: React.FC<SmoothSpotlightProps> = ({
       {/* Click blocking overlays - four rectangles */}
       {(blockClicks || onClickOutside) && (
         <div
+          data-spotlight-blocker='true'
           style={{
             position: 'absolute',
             inset: 0,

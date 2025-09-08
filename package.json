@@ -1,5 +1,5 @@
 {
-  "name": "touring",
+  "name": "@tinystack/touring",
   "version": "0.1.0",
   "description": "A flexible onboarding tour library for React applications",
   "main": "./dist/index.js",

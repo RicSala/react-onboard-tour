@@ -33,6 +33,11 @@ export const TouringReact = ({
   const { currentTour, currentStep, setCurrentStep, closeTour, isTourActive } =
     useTour();
 
+  // Debug tour state
+  useEffect(() => {
+    console.log('Tour state:', { isTourActive, currentTour });
+  }, [isTourActive, currentTour]);
+
   const [isValidating, setIsValidating] = useState(false);
   const [element, setElement] = useState<HTMLElement>();
   const [hasSearched, setHasSearched] = useState(false);
@@ -289,6 +294,7 @@ export const TouringReact = ({
           floatingStyles={position}
           floatingRef={refs.floating as RefObject<HTMLElement>}
           currentStep={currentStep}
+          isTourActive={isTourActive}
         />
       )}
       <AnimatePresence>
