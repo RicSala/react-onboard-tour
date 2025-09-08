@@ -15,6 +15,16 @@ import { useWatchForChanges } from '../hooks/useWatchForChanges';
 import { useOnPopstate } from '../hooks/useOnPopstate';
 import { Debugger } from './Debugger';
 
+const scrollIfNeeded = (element: HTMLElement, padding = 100) => {
+  const rect = element.getBoundingClientRect();
+  const isInView =
+    rect.top >= padding && rect.bottom <= window.innerHeight - padding;
+
+  if (!isInView) {
+    element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
+};
+
 export const TouringReact = ({
   // children,
   tours,
@@ -98,7 +108,7 @@ export const TouringReact = ({
       console.log('foundElement', foundElement);
       setElement(foundElement);
       refs.setReference(foundElement);
-      foundElement.scrollIntoView({ behavior: 'smooth' });
+      scrollIfNeeded(foundElement);
     }
     setHasSearched(true);
   }, [currentStepConfig, element?.innerText, refs]);
@@ -198,12 +208,14 @@ export const TouringReact = ({
           if (targetSelector) {
             // Use MutationObserver to detect when the target element is available in the DOM
             const observer = new MutationObserver((_, observer) => {
-              const element = document.querySelector(targetSelector);
+              const element = document.querySelector(
+                targetSelector
+              ) as HTMLElement | null;
               if (element) {
                 // Once the element is found, update the step and scroll to the element
                 setCurrentStep(prevStepIndex);
-                // scroll element into view
-                element.scrollIntoView({ behavior: 'smooth' });
+                // scroll element into view if needed
+                scrollIfNeeded(element);
 
                 // Stop observing after the element is found
                 observer.disconnect();
@@ -301,17 +313,19 @@ export const TouringReact = ({
           />
         )}
       </AnimatePresence>
-      <AnimatePresence mode="wait">
+      <AnimatePresence mode='wait'>
         {currentStepConfig && hasSearched && (
           <motion.div
             key={`${currentStep}-${element ? 'element' : 'centered'}`}
             style={{
-              ...(element ? floatingStyles : {
-                position: 'fixed',
-                top: '50%',
-                left: '50%',
-                transform: 'translate(-50%, -50%)'
-              }),
+              ...(element
+                ? floatingStyles
+                : {
+                    position: 'fixed',
+                    top: '50%',
+                    left: '50%',
+                    transform: 'translate(-50%, -50%)',
+                  }),
               zIndex: 1000,
             }}
             ref={refs.setFloating}
