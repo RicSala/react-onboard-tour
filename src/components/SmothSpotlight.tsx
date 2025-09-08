@@ -25,7 +25,6 @@ export const SmoothSpotlight: React.FC<SmoothSpotlightProps> = ({
   onClickOutside,
 }) => {
   const [position, setPosition] = useState(() => {
-    console.log('!!!initializing element state');
     if (!element) return { px: 0, py: 0, pw: 0, ph: 0 };
     const rect = element.getBoundingClientRect();
     return {
@@ -38,7 +37,6 @@ export const SmoothSpotlight: React.FC<SmoothSpotlightProps> = ({
 
   // Update position on scroll or resize
   useEffect(() => {
-    console.log('!!!updating position state');
     if (!element) {
       return setPosition((prev) => ({
         px: prev.px + prev.pw / 2,

@@ -14,16 +14,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { useWatchForChanges } from '../hooks/useWatchForChanges';
 import { useOnPopstate } from '../hooks/useOnPopstate';
 import { Debugger } from './Debugger';
-
-const scrollIfNeeded = (element: HTMLElement, padding = 100) => {
-  const rect = element.getBoundingClientRect();
-  const isInView =
-    rect.top >= padding && rect.bottom <= window.innerHeight - padding;
-
-  if (!isInView) {
-    element.scrollIntoView({ behavior: 'smooth', block: 'center' });
-  }
-};
+import { scrollIfNeeded } from '../utils/scrollIfNeeded';
 
 export const TouringReact = ({
   // children,
@@ -45,6 +36,7 @@ export const TouringReact = ({
   const [isValidating, setIsValidating] = useState(false);
   const [element, setElement] = useState<HTMLElement>();
   const [hasSearched, setHasSearched] = useState(false);
+  const [showCard, setShowCard] = useState(false);
 
   const { refs, floatingStyles } = useFloating({
     whileElementsMounted: autoUpdate,
@@ -78,7 +70,6 @@ export const TouringReact = ({
   );
 
   const skipTour = useCallback(() => {
-    console.log('skipTour');
     onSkip?.(currentStep, currentTour);
     setHasSearched(false);
     closeTour();
@@ -86,13 +77,16 @@ export const TouringReact = ({
 
   // Update the element and ref when the step changes
   useEffect(() => {
-    console.log('element', element?.innerText);
     if (!currentStepConfig) return;
+
+    // Hide card while transitioning
+    setShowCard(false);
 
     if (!currentStepConfig.selector) {
       setElement(undefined);
       refs.setReference(null);
       setHasSearched(true);
+      setShowCard(true);
       return;
     }
 
@@ -101,14 +95,16 @@ export const TouringReact = ({
     ) as HTMLElement;
 
     if (!foundElement) {
-      console.log('No element found for selector:', currentStepConfig.selector);
       setElement(undefined);
       refs.setReference(null);
+      setShowCard(true);
     } else {
-      console.log('foundElement', foundElement);
       setElement(foundElement);
       refs.setReference(foundElement);
-      scrollIfNeeded(foundElement);
+      // Wait for scroll to finish before showing card
+      scrollIfNeeded(foundElement).then(() => {
+        setShowCard(true);
+      });
     }
     setHasSearched(true);
   }, [currentStepConfig, element?.innerText, refs]);
@@ -196,7 +192,6 @@ export const TouringReact = ({
       try {
         const prevStepIndex = currentStep - 1;
         const route = currentTourSteps[currentStep].prevRoute;
-        console.log('route', route);
 
         onStepChange?.(prevStepIndex, currentTour);
 
@@ -214,9 +209,6 @@ export const TouringReact = ({
               if (element) {
                 // Once the element is found, update the step and scroll to the element
                 setCurrentStep(prevStepIndex);
-                // scroll element into view if needed
-                scrollIfNeeded(element);
-
                 // Stop observing after the element is found
                 observer.disconnect();
               }
@@ -314,7 +306,7 @@ export const TouringReact = ({
         )}
       </AnimatePresence>
       <AnimatePresence mode='wait'>
-        {currentStepConfig && hasSearched && (
+        {currentStepConfig && hasSearched && showCard && (
           <motion.div
             key={`${currentStep}-${element ? 'element' : 'centered'}`}
             style={{
