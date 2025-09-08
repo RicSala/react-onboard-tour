@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { RefObject, useCallback, useEffect, useMemo, useState } from 'react';
 import { TouringReactProps } from '../types';
 import { SmoothSpotlight } from './SmothSpotlight';
 import { useTour } from './TourProvider';
@@ -13,6 +13,7 @@ import {
 import { motion, AnimatePresence } from 'motion/react';
 import { useWatchForChanges } from '../hooks/useWatchForChanges';
 import { useOnPopstate } from '../hooks/useOnPopstate';
+import { Debugger } from './Debugger';
 
 export const TouringReact = ({
   // children,
@@ -26,11 +27,14 @@ export const TouringReact = ({
   closeOnClickOutside = false,
   toastFn = () => {},
   navigationAdapter = () => ({ push: () => {}, getCurrentPath: () => '' }),
+  debug = false,
 }: TouringReactProps) => {
   const { currentTour, currentStep, setCurrentStep, closeTour, isTourActive } =
     useTour();
 
   const [isValidating, setIsValidating] = useState(false);
+  const [element, setElement] = useState<HTMLElement>();
+  const [hasSearched, setHasSearched] = useState(false);
 
   const { refs, floatingStyles } = useFloating({
     whileElementsMounted: autoUpdate,
@@ -45,33 +49,30 @@ export const TouringReact = ({
         crossAxis: true, // Allow shifting on cross axis to push into reference element
       }),
     ],
-    placement: 'right',
+    placement: 'right', // Use bottom as base, offset will center it
   });
-
-  const router = useMemo(navigationAdapter, []);
 
   const currentTourSteps = useMemo(
     () => tours.find((tour) => tour.tour === currentTour)?.steps,
     [currentTour, tours]
   );
-  const currentStepConfig = currentTourSteps
-    ? currentTourSteps[currentStep]
-    : undefined;
+  const currentStepConfig = useMemo(
+    () => (currentTourSteps ? currentTourSteps[currentStep] : undefined),
+    [currentTourSteps, currentStep]
+  );
 
-  const isFinalStep = currentTourSteps
-    ? currentStep === currentTourSteps?.length - 1
-    : false;
-
-  const [element, setElement] = useState<HTMLElement>();
-  const [hasSearched, setHasSearched] = useState(false);
+  const isFinalStep = useMemo(
+    () =>
+      currentTourSteps ? currentStep === currentTourSteps?.length - 1 : false,
+    [currentTourSteps, currentStep]
+  );
 
   const skipTour = useCallback(() => {
+    console.log('skipTour');
     onSkip?.(currentStep, currentTour);
     setHasSearched(false);
     closeTour();
   }, [currentStep, currentTour, onSkip, closeTour]);
-
-  useOnPopstate(skipTour);
 
   // Update the element and ref when the step changes
   useEffect(() => {
@@ -97,11 +98,12 @@ export const TouringReact = ({
       console.log('foundElement', foundElement);
       setElement(foundElement);
       refs.setReference(foundElement);
+      foundElement.scrollIntoView({ behavior: 'smooth' });
     }
     setHasSearched(true);
-  }, [currentStepConfig]);
+  }, [currentStepConfig, element?.innerText, refs]);
 
-  const nextStep = async () => {
+  const nextStep = useCallback(async () => {
     if (!currentTourSteps || !currentStepConfig || isValidating) return;
 
     // Check if current step has validation
@@ -136,7 +138,7 @@ export const TouringReact = ({
 
       if (!route) return setCurrentStep(nextStepIndex);
 
-      router.push(route);
+      navigationAdapter().push(route);
 
       const targetSelector = currentTourSteps[nextStepIndex].selector;
 
@@ -148,9 +150,6 @@ export const TouringReact = ({
         if (element) {
           // Once the element is found, update the step and scroll to the element
           setCurrentStep(nextStepIndex);
-          // scroll element into view
-          element.scrollIntoView({ behavior: 'smooth' });
-
           // Stop observing after the element is found
           observer.disconnect();
         }
@@ -166,16 +165,23 @@ export const TouringReact = ({
         console.error('Error navigating to next route', error);
       }
     }
-  };
+  }, [
+    currentTourSteps,
+    currentStepConfig,
+    isValidating,
+    isFinalStep,
+    currentStep,
+    toastFn,
+    onComplete,
+    currentTour,
+    closeTour,
+    onStepChange,
+    setCurrentStep,
+    navigationAdapter,
+    disableConsoleLogs,
+  ]);
 
-  useWatchForChanges({
-    config: currentStepConfig?.watchForChanges,
-    targetSelector: currentStepConfig?.selector,
-    onChangeDetected: nextStep,
-    enabled: !!currentStepConfig?.watchForChanges,
-  });
-
-  const prevStep = () => {
+  const prevStep = useCallback(() => {
     if (currentTourSteps && currentStep > 0) {
       try {
         const prevStepIndex = currentStep - 1;
@@ -185,7 +191,7 @@ export const TouringReact = ({
         onStepChange?.(prevStepIndex, currentTour);
 
         if (route) {
-          router.push(route);
+          navigationAdapter().push(route);
 
           const targetSelector = currentTourSteps[prevStepIndex].selector;
 
@@ -222,7 +228,26 @@ export const TouringReact = ({
         }
       }
     }
-  };
+  }, [
+    currentTourSteps,
+    currentStep,
+    onStepChange,
+    currentTour,
+    navigationAdapter,
+    setCurrentStep,
+    disableConsoleLogs,
+  ]);
+
+  // If nextstep conditions are met, advance to next step
+  useWatchForChanges({
+    config: currentStepConfig?.watchForChanges,
+    targetSelector: currentStepConfig?.selector,
+    onChangeDetected: nextStep,
+    enabled: !!currentStepConfig?.watchForChanges,
+  });
+
+  // If the user navigates back, skip the tour
+  useOnPopstate(skipTour);
 
   // keyboard control
   useEffect(() => {
@@ -238,11 +263,30 @@ export const TouringReact = ({
   // scroll to top when tour is closed
   useEffect(() => {
     if (isTourActive) return;
-    scrollToTop && window.scrollTo({ top: 0, behavior: 'smooth' });
+    window.scrollTo?.({ top: 0, behavior: 'smooth' });
   }, [scrollToTop, isTourActive]);
+
+  const position = useMemo(() => {
+    return {
+      // Don't animate position - it's not animatable!
+      position: element ? floatingStyles.position : 'fixed',
+      top: element ? floatingStyles.top : '50%',
+      left: element ? floatingStyles.left : '50%',
+      transform: element ? floatingStyles.transform : 'translate(-50%, -50%)',
+    };
+  }, [element, floatingStyles]);
 
   return (
     <div>
+      {/* Debugger Component */}
+      {debug && (
+        <Debugger
+          element={element as HTMLElement}
+          floatingStyles={position}
+          floatingRef={refs.floating as RefObject<HTMLElement>}
+          currentStep={currentStep}
+        />
+      )}
       <AnimatePresence>
         {isTourActive && hasSearched && (
           <SmoothSpotlight
@@ -259,18 +303,17 @@ export const TouringReact = ({
       </AnimatePresence>
       {currentStepConfig && hasSearched && (
         <motion.div
-          style={{ ...floatingStyles, zIndex: 1000 }}
-          ref={refs.setFloating}
-          initial={false}
-          animate={{
-            position: element ? (floatingStyles.position as any) : 'fixed',
-            top: element ? floatingStyles.top : '50%',
-            left: element ? floatingStyles.left : '50%',
-            transform: element
-              ? floatingStyles.transform
-              : 'translate(-50%, -50%)',
+          style={{
+            ...floatingStyles,
+            position: element ? floatingStyles.position : 'fixed',
+            zIndex: 1000,
           }}
-          transition={{ duration: 0.4, ease: 'easeInOut' }}
+          ref={refs.setFloating}
+          animate={position}
+          transition={{
+            default: { duration: 0.4, ease: 'easeInOut' },
+            layout: { duration: 0.4, ease: 'easeInOut' },
+          }}
         >
           <DefaultCard
             arrow={<></>}

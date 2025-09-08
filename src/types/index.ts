@@ -77,6 +77,7 @@ export interface TouringReactProps {
   noInViewScroll?: boolean;
   closeOnClickOutside?: boolean;
   toastFn?: (message: string) => void;
+  debug?: boolean;
 }
 
 export interface CardComponentProps {

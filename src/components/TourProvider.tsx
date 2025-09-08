@@ -42,13 +42,15 @@ export const TourProvider: React.FC<TourProviderProps> = ({
     setCurrentTour(null);
   }, []);
 
-  const startTour = useCallback((tour: string) => {
-    console.log('startTour', tour);
-    console.log('currentTour', currentTour);
-    setCurrentTour(tour);
-    setCurrentStepState(0);
-    setIsActive(true);
-  }, []);
+  const startTour = useCallback(
+    (tour: string) => {
+      if (isActive) return;
+      setCurrentTour(tour);
+      setCurrentStepState(0);
+      setIsActive(true);
+    },
+    [isActive]
+  );
 
   const value = useMemo<TouringContextType>(
     () => ({
