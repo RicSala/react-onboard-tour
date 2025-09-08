@@ -301,32 +301,38 @@ export const TouringReact = ({
           />
         )}
       </AnimatePresence>
-      {currentStepConfig && hasSearched && (
-        <motion.div
-          style={{
-            ...floatingStyles,
-            position: element ? floatingStyles.position : 'fixed',
-            zIndex: 1000,
-          }}
-          ref={refs.setFloating}
-          animate={position}
-          transition={{
-            default: { duration: 0.4, ease: 'easeInOut' },
-            layout: { duration: 0.4, ease: 'easeInOut' },
-          }}
-        >
-          <DefaultCard
-            arrow={<></>}
-            step={currentStepConfig}
-            currentStep={currentStep}
-            totalSteps={currentTourSteps?.length || 0}
-            nextStep={nextStep}
-            prevStep={prevStep}
-            skipTour={skipTour}
-            isValidating={isValidating}
-          />
-        </motion.div>
-      )}
+      <AnimatePresence mode="wait">
+        {currentStepConfig && hasSearched && (
+          <motion.div
+            key={`${currentStep}-${element ? 'element' : 'centered'}`}
+            style={{
+              ...(element ? floatingStyles : {
+                position: 'fixed',
+                top: '50%',
+                left: '50%',
+                transform: 'translate(-50%, -50%)'
+              }),
+              zIndex: 1000,
+            }}
+            ref={refs.setFloating}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2, ease: 'easeInOut' }}
+          >
+            <DefaultCard
+              arrow={<></>}
+              step={currentStepConfig}
+              currentStep={currentStep}
+              totalSteps={currentTourSteps?.length || 0}
+              nextStep={nextStep}
+              prevStep={prevStep}
+              skipTour={skipTour}
+              isValidating={isValidating}
+            />
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };
