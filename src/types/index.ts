@@ -1,6 +1,16 @@
 import { Transition } from 'motion/react';
 import { ReactNode } from 'react';
 
+export interface WatchForChanges {
+  target?: string; // Selector for where to watch (defaults to the highlighted element)
+  lookFor: string; // Selector for what change indicates completion
+  childList?: boolean; // Watch for added/removed nodes (default: true)
+  attributes?: boolean; // Watch for attribute changes
+  characterData?: boolean; // Watch for text content changes
+  timeout?: number; // Stop watching after X ms (default: 10000)
+  debounce?: number; // Wait X ms after change before advancing (default: 100)
+}
+
 export interface Step {
   icon: ReactNode | string | null;
   title: string;
@@ -27,6 +37,10 @@ export interface Step {
   nextRoute?: string;
   prevRoute?: string;
   viewportID?: string;
+  watchForChanges?: WatchForChanges; // New field for mutation observer config
+  validate?: () => Promise<
+    { isValid: true } | { isValid: false; error: string }
+  >;
 }
 
 export interface Tour {
@@ -44,7 +58,7 @@ export interface TouringContext {
 }
 
 export interface TouringReactProps {
-  children: React.ReactNode;
+  // children: React.ReactNode;
   tours: Tour[];
   showNextStep?: boolean;
   shadowRgb?: string;
@@ -61,6 +75,8 @@ export interface TouringReactProps {
   disableConsoleLogs?: boolean;
   scrollToTop?: boolean;
   noInViewScroll?: boolean;
+  closeOnClickOutside?: boolean;
+  toastFn?: (message: string) => void;
 }
 
 export interface CardComponentProps {
@@ -73,6 +89,7 @@ export interface CardComponentProps {
   arrow: ReactNode;
   className?: string;
   style?: React.CSSProperties;
+  isValidating?: boolean;
 }
 
 export interface NavigationAdapter {

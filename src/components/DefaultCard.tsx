@@ -13,6 +13,7 @@ const DefaultCard = forwardRef<HTMLDivElement, CardComponentProps>(
       arrow,
       className,
       style,
+      isValidating,
     },
     ref
   ) => {
@@ -109,17 +110,18 @@ const DefaultCard = forwardRef<HTMLDivElement, CardComponentProps>(
           ) : (
             <button
               onClick={nextStep}
+              disabled={isValidating}
               style={{
                 padding: '0.5rem 1rem',
                 fontWeight: '500',
                 color: 'white',
-                backgroundColor: '#2563EB',
+                backgroundColor: isValidating ? '#9CA3AF' : '#2563EB',
                 borderRadius: '0.375rem',
-                cursor: 'pointer',
+                cursor: isValidating ? 'not-allowed' : 'pointer',
                 display: step.showControls ? 'block' : 'none',
               }}
             >
-              Next
+              {'Next'}
             </button>
           )}
         </div>

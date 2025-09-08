@@ -1,0 +1,175 @@
+---
+alwaysApply: false
+---
+
+# React Onboarding Tour Library - "Touring"
+
+## Project Overview
+
+A flexible and feature-rich onboarding tour library for React applications with support for Next.js navigation. The library provides guided tours to help users navigate through web applications with interactive highlights, tooltips, and step-by-step instructions.
+
+## Tech Stack
+
+- **Framework**: React 18+ with TypeScript
+- **Build Tool**: tsup (for bundling)
+- **Package Manager**: pnpm 10.6.2
+- **Dependencies**:
+  - @floating-ui/react - For intelligent tooltip positioning
+  - motion (framer-motion) - For smooth animations
+- **Optional**: Next.js 14+ support via navigation adapter
+
+## Core Components
+
+### TourProvider
+
+- Context provider that manages tour state globally
+- Tracks current tour, step, and active status
+- Provides methods: `startTour()`, `closeTour()`, `setCurrentStep()`
+- Must wrap the application root
+
+### TouringReact
+
+- Main tour orchestrator component
+- Handles step navigation (next/prev)
+- Manages DOM element highlighting via spotlight
+- Supports validation before advancing steps
+- Keyboard controls (arrows, escape)
+- Auto-advance on DOM changes via MutationObserver
+- Route-based navigation between steps
+
+### SmoothSpotlight
+
+- Creates overlay with spotlight effect on target elements
+- Smooth animations between highlights
+- Configurable padding and border radius
+- Click-through support for overlay
+
+### DefaultCard
+
+- Default tooltip card component for tour steps
+- Shows step content, title, icon
+- Navigation buttons (prev/next/skip)
+- Progress indicator
+- Can be replaced with custom card component
+
+## Key Features
+
+### Step Configuration
+
+- **Selectors**: CSS selectors to highlight elements
+- **Content**: React nodes for step descriptions
+- **Positioning**: 12 placement options (top, bottom, left, right + corners)
+- **Navigation**: Route changes between steps (nextRoute/prevRoute)
+- **Validation**: Async validation before advancing
+- **DOM Watching**: Auto-advance when DOM changes occur (watchForChanges)
+- **Controls**: Configurable visibility of navigation buttons
+
+### Advanced Capabilities
+
+1. **Multi-route Tours**: Navigate across different pages/routes
+2. **Validation System**: Prevent advancement until conditions met
+3. **DOM Change Detection**: Watch for specific DOM mutations to auto-advance
+4. **Viewport Support**: Target elements within specific viewport containers
+5. **Keyboard Navigation**: Arrow keys and escape key support
+6. **Custom Styling**: Configurable shadow, opacity, transitions
+7. **Event Callbacks**: onStart, onComplete, onSkip, onStepChange
+
+### Navigation Adapters
+
+- Abstraction layer for routing
+- Built-in Next.js adapter (`useNextNavigationAdapter`)
+- Custom adapters possible for other routers
+
+## Type System
+
+Comprehensive TypeScript definitions for:
+
+- Step configurations
+- Tour definitions
+- Context interfaces
+- Component props
+- Navigation adapters
+- Validation results
+- DOM watching options
+
+## Development Features
+
+- Watch mode for live rebuilding
+- Global linking for local development
+- TypeScript checking
+- ESM and CJS dual output
+- Type definitions generation
+
+## Use Cases
+
+- User onboarding flows
+- Feature tutorials
+- Product tours
+- Interactive help systems
+- Form completion guides
+- Dashboard walkthroughs
+
+## Architecture Notes
+
+- Context-based state management
+- Floating UI for smart positioning
+- Framer Motion for animations
+- MutationObserver for DOM monitoring
+- Component composition pattern
+- Adapter pattern for navigation
+
+## Project Structure
+
+```
+react-onboard-tour/
+├── .cursor/                          # Cursor rules
+├── .learnings/                          # Development learnings and documentation
+│   ├── ...                             # Personal learning notes
+├── scripts/
+│   └── setup-dev.sh                    # Development setup automation script
+├── src/
+│   ├── adapters/
+│   │   └── nextjs.ts                   # Next.js navigation adapter hook
+│   ├── components/
+│   │   ├── DefaultCard.tsx             # Default tour step card UI component
+│   │   ├── SmothSpotlight.tsx          # Spotlight overlay component
+│   │   ├── TouringReact.tsx            # Main tour orchestrator component
+│   │   └── TourProvider.tsx            # Context provider for tour state
+│   ├── hooks/
+│   │   ├── index.ts                    # Hook exports
+│   │   └── useWatchForChanges.ts       # DOM mutation observer hook
+│   ├── types/
+│   │   └── index.ts                    # TypeScript type definitions
+│   └── index.ts                        # Main library entry point and exports
+├── ...
+
+Build output (generated):
+├── dist/
+│   ├── index.js                       # CommonJS build
+│   ├── index.mjs                      # ES Module build
+│   ├── index.d.ts                     # Type definitions
+│   └── index.css                      # Styles (if any)
+```
+
+## File Responsibilities
+
+### Core Components (`src/components/`)
+
+- **TourProvider.tsx**: Global state management, tour lifecycle
+- **TouringReact.tsx**: Step logic, navigation, validation, DOM monitoring
+- **SmothSpotlight.tsx**: Visual highlighting and overlay effects
+- **DefaultCard.tsx**: Step content display and controls
+
+### Utilities (`src/hooks/`)
+
+- **useWatchForChanges.ts**: MutationObserver wrapper for auto-advancement
+
+### Integration (`src/adapters/`)
+
+- **nextjs.ts**: Next.js App Router integration
+
+### Configuration Files
+
+- **tsconfig.json**: TypeScript compiler options
+- **package.json**: Dependencies, scripts, package metadata
+- **.cursor/rules/**: AI assistant context and behavior

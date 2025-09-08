@@ -1,18 +1,17 @@
 'use client';
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { motion } from 'motion/react';
 
-// special thanks to https://github.com/enszrlu/NextStep/issues/32 @dinamicby
-
 interface SmoothSpotlightProps {
-  element: HTMLElement;
+  element?: HTMLElement;
   padding: number;
   radius: number;
   shadowOpacity: string;
   shadowRgb: string;
   blockClicks: boolean;
   viewport?: HTMLElement;
+  onClickOutside?: () => void;
 }
 
 export const SmoothSpotlight: React.FC<SmoothSpotlightProps> = ({
@@ -23,11 +22,57 @@ export const SmoothSpotlight: React.FC<SmoothSpotlightProps> = ({
   shadowRgb,
   blockClicks,
   viewport,
+  onClickOutside,
 }) => {
-  const px = element.getBoundingClientRect().x - padding / 2;
-  const py = element.getBoundingClientRect().y - padding / 2;
-  const pw = element.getBoundingClientRect().width + padding;
-  const ph = element.getBoundingClientRect().height + padding;
+  const [position, setPosition] = useState(() => {
+    if (!element) return { px: 0, py: 0, pw: 0, ph: 0 };
+    const rect = element.getBoundingClientRect();
+    return {
+      px: rect.x - padding / 2,
+      py: rect.y - padding / 2,
+      pw: rect.width + padding,
+      ph: rect.height + padding,
+    };
+  });
+
+  // Update position on scroll or resize
+  useEffect(() => {
+    if (!element)
+      return setPosition((prev) => ({
+        px: prev.px + prev.pw / 2,
+        py: prev.py + prev.ph / 2,
+        pw: 0,
+        ph: 0,
+      }));
+    const updatePosition = () => {
+      const rect = element.getBoundingClientRect();
+      setPosition({
+        px: rect.x - padding / 2,
+        py: rect.y - padding / 2,
+        pw: rect.width + padding,
+        ph: rect.height + padding,
+      });
+    };
+
+    // Initial update
+    updatePosition();
+
+    // Listen to scroll and resize events
+    window.addEventListener('scroll', updatePosition, true); // Use capture to catch all scroll events
+    window.addEventListener('resize', updatePosition);
+
+    // Also observe the element for position changes
+    const resizeObserver = new ResizeObserver(updatePosition);
+    resizeObserver.observe(element);
+
+    return () => {
+      window.removeEventListener('scroll', updatePosition, true);
+      window.removeEventListener('resize', updatePosition);
+      resizeObserver.disconnect();
+    };
+  }, [element, padding]);
+
+  const { px, py, pw, ph } = position;
 
   // Get viewport dimensions
   const viewportElement = viewport || document.body;
@@ -40,7 +85,7 @@ export const SmoothSpotlight: React.FC<SmoothSpotlightProps> = ({
       {/* Visual spotlight effect */}
       <motion.div
         style={{
-          position: 'absolute',
+          position: 'fixed',
           inset: 0,
           zIndex: 998,
           pointerEvents: 'none',
@@ -94,7 +139,7 @@ export const SmoothSpotlight: React.FC<SmoothSpotlightProps> = ({
       </motion.div>
 
       {/* Click blocking overlays - four rectangles */}
-      {blockClicks && (
+      {(blockClicks || onClickOutside) && (
         <div
           style={{
             position: 'absolute',
@@ -107,6 +152,7 @@ export const SmoothSpotlight: React.FC<SmoothSpotlightProps> = ({
         >
           {/* Top rectangle */}
           <motion.div
+            onClick={onClickOutside}
             style={{
               position: 'absolute',
               top: 0,
@@ -122,6 +168,7 @@ export const SmoothSpotlight: React.FC<SmoothSpotlightProps> = ({
 
           {/* Bottom rectangle */}
           <motion.div
+            onClick={onClickOutside}
             style={{
               position: 'absolute',
               left: 0,
@@ -137,6 +184,7 @@ export const SmoothSpotlight: React.FC<SmoothSpotlightProps> = ({
 
           {/* Left rectangle */}
           <motion.div
+            onClick={onClickOutside}
             style={{
               position: 'absolute',
               left: 0,
@@ -152,6 +200,7 @@ export const SmoothSpotlight: React.FC<SmoothSpotlightProps> = ({
 
           {/* Right rectangle */}
           <motion.div
+            onClick={onClickOutside}
             style={{
               position: 'absolute',
               top: 0,

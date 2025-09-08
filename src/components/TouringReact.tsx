@@ -1,13 +1,21 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { TouringReactProps } from '../types';
 import { SmoothSpotlight } from './SmothSpotlight';
 import { useTour } from './TourProvider';
 import DefaultCard from './DefaultCard';
-import { useFloating, autoUpdate, flip, offset } from '@floating-ui/react';
+import {
+  useFloating,
+  autoUpdate,
+  flip,
+  offset,
+  shift,
+} from '@floating-ui/react';
 import { motion, AnimatePresence } from 'motion/react';
+import { useWatchForChanges } from '../hooks/useWatchForChanges';
+import { useOnPopstate } from '../hooks/useOnPopstate';
 
 export const TouringReact = ({
-  children,
+  // children,
   tours,
   onStepChange,
   onComplete,
@@ -15,42 +23,105 @@ export const TouringReact = ({
   disableConsoleLogs,
   scrollToTop,
   noInViewScroll,
+  closeOnClickOutside = false,
+  toastFn = () => {},
   navigationAdapter = () => ({ push: () => {}, getCurrentPath: () => '' }),
 }: TouringReactProps) => {
-  const { currentTour, currentStep, setCurrentStep, closeTour } = useTour();
+  const { currentTour, currentStep, setCurrentStep, closeTour, isTourActive } =
+    useTour();
+
+  const [isValidating, setIsValidating] = useState(false);
+
   const { refs, floatingStyles } = useFloating({
     whileElementsMounted: autoUpdate,
-    middleware: [flip(), offset(20)],
+    middleware: [
+      offset(20),
+      flip({
+        fallbackAxisSideDirection: 'start', // Allow switching to top/bottom when left/right don't fit
+        crossAxis: true, // Check the perpendicular axis
+      }),
+      shift({
+        padding: 8,
+        crossAxis: true, // Allow shifting on cross axis to push into reference element
+      }),
+    ],
     placement: 'right',
   });
 
-  const router = navigationAdapter();
+  const router = useMemo(navigationAdapter, []);
 
-  const currentTourSteps = tours.find(
-    (tour) => tour.tour === currentTour
-  )?.steps;
-  const [element, setElement] = useState<HTMLButtonElement | null>(null);
+  const currentTourSteps = useMemo(
+    () => tours.find((tour) => tour.tour === currentTour)?.steps,
+    [currentTour, tours]
+  );
+  const currentStepConfig = currentTourSteps
+    ? currentTourSteps[currentStep]
+    : undefined;
 
+  const isFinalStep = currentTourSteps
+    ? currentStep === currentTourSteps?.length - 1
+    : false;
+
+  const [element, setElement] = useState<HTMLElement>();
+  const [hasSearched, setHasSearched] = useState(false);
+
+  const skipTour = useCallback(() => {
+    onSkip?.(currentStep, currentTour);
+    setHasSearched(false);
+    closeTour();
+  }, [currentStep, currentTour, onSkip, closeTour]);
+
+  useOnPopstate(skipTour);
+
+  // Update the element and ref when the step changes
   useEffect(() => {
-    const step = currentTourSteps?.[currentStep];
+    console.log('element', element?.innerText);
+    if (!currentStepConfig) return;
 
-    console.log('step', step);
-    if (step?.selector) {
-      const foundElement = document.querySelector(
-        step.selector
-      ) as HTMLButtonElement;
+    if (!currentStepConfig.selector) {
+      setElement(undefined);
+      refs.setReference(null);
+      setHasSearched(true);
+      return;
+    }
+
+    let foundElement = document.querySelector(
+      currentStepConfig.selector
+    ) as HTMLElement;
+
+    if (!foundElement) {
+      console.log('No element found for selector:', currentStepConfig.selector);
+      setElement(undefined);
+      refs.setReference(null);
+    } else {
+      console.log('foundElement', foundElement);
       setElement(foundElement);
       refs.setReference(foundElement);
-    } else {
-      setElement(null);
-      refs.setReference(null);
     }
-  }, [currentStep, currentTourSteps]);
+    setHasSearched(true);
+  }, [currentStepConfig]);
 
-  const nextStep = () => {
-    if (!currentTourSteps) return;
+  const nextStep = async () => {
+    if (!currentTourSteps || !currentStepConfig || isValidating) return;
 
-    const isFinalStep = currentStep === currentTourSteps?.length - 1;
+    // Check if current step has validation
+    if (currentStepConfig.validate) {
+      setIsValidating(true);
+      try {
+        const result = await currentStepConfig.validate();
+        if (!result.isValid) {
+          console.error('Validation failed:', result);
+          toastFn(result.error || 'Validation failed');
+          setIsValidating(false);
+          return; // Don't proceed to next step
+        }
+      } catch (error) {
+        console.error('Validation error:', error);
+        setIsValidating(false);
+        return;
+      }
+      setIsValidating(false);
+    }
 
     if (isFinalStep) {
       onComplete?.(currentTour);
@@ -58,7 +129,7 @@ export const TouringReact = ({
     }
 
     const nextStepIndex = currentStep + 1;
-    const route = currentTourSteps[currentStep].nextRoute;
+    const route = currentStepConfig.nextRoute;
 
     try {
       onStepChange?.(nextStepIndex, currentTour);
@@ -72,12 +143,13 @@ export const TouringReact = ({
       if (!targetSelector) return setCurrentStep(nextStepIndex);
 
       // Use MutationObserver to detect when the target element is available in the DOM
-      const observer = new MutationObserver((mutations, observer) => {
+      const observer = new MutationObserver((_, observer) => {
         const element = document.querySelector(targetSelector);
         if (element) {
           // Once the element is found, update the step and scroll to the element
           setCurrentStep(nextStepIndex);
-          // scrollToElement(nextStepIndex);
+          // scroll element into view
+          element.scrollIntoView({ behavior: 'smooth' });
 
           // Stop observing after the element is found
           observer.disconnect();
@@ -96,6 +168,13 @@ export const TouringReact = ({
     }
   };
 
+  useWatchForChanges({
+    config: currentStepConfig?.watchForChanges,
+    targetSelector: currentStepConfig?.selector,
+    onChangeDetected: nextStep,
+    enabled: !!currentStepConfig?.watchForChanges,
+  });
+
   const prevStep = () => {
     if (currentTourSteps && currentStep > 0) {
       try {
@@ -112,12 +191,13 @@ export const TouringReact = ({
 
           if (targetSelector) {
             // Use MutationObserver to detect when the target element is available in the DOM
-            const observer = new MutationObserver((mutations, observer) => {
+            const observer = new MutationObserver((_, observer) => {
               const element = document.querySelector(targetSelector);
               if (element) {
                 // Once the element is found, update the step and scroll to the element
                 setCurrentStep(prevStepIndex);
-                // scrollToElement(prevStepIndex);
+                // scroll element into view
+                element.scrollIntoView({ behavior: 'smooth' });
 
                 // Stop observing after the element is found
                 observer.disconnect();
@@ -144,11 +224,6 @@ export const TouringReact = ({
     }
   };
 
-  const skipTour = () => {
-    onSkip?.(currentStep, currentTour);
-    closeTour();
-  };
-
   // keyboard control
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
@@ -160,44 +235,52 @@ export const TouringReact = ({
     return () => document.removeEventListener('keydown', handleKeyDown);
   }, [nextStep, prevStep, skipTour]);
 
+  // scroll to top when tour is closed
+  useEffect(() => {
+    if (isTourActive) return;
+    scrollToTop && window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, [scrollToTop, isTourActive]);
+
   return (
     <div>
-      {children}
       <AnimatePresence>
-        {element && (
+        {isTourActive && hasSearched && (
           <SmoothSpotlight
             key='spotlight'
             blockClicks={false}
-            element={element!}
+            element={element}
             padding={20}
             radius={10}
             shadowOpacity='0.5'
             shadowRgb='0, 0, 0'
-            // Step Controls
+            onClickOutside={closeOnClickOutside ? skipTour : undefined}
           />
         )}
       </AnimatePresence>
-      {currentTourSteps?.[currentStep] && (
+      {currentStepConfig && hasSearched && (
         <motion.div
           style={{ ...floatingStyles, zIndex: 1000 }}
           ref={refs.setFloating}
           initial={false}
           animate={{
-            position: floatingStyles.position as any,
-            top: floatingStyles.top,
-            left: floatingStyles.left,
-            transform: floatingStyles.transform,
+            position: element ? (floatingStyles.position as any) : 'fixed',
+            top: element ? floatingStyles.top : '50%',
+            left: element ? floatingStyles.left : '50%',
+            transform: element
+              ? floatingStyles.transform
+              : 'translate(-50%, -50%)',
           }}
           transition={{ duration: 0.4, ease: 'easeInOut' }}
         >
           <DefaultCard
             arrow={<></>}
-            step={currentTourSteps?.[currentStep]}
+            step={currentStepConfig}
             currentStep={currentStep}
             totalSteps={currentTourSteps?.length || 0}
             nextStep={nextStep}
             prevStep={prevStep}
             skipTour={skipTour}
+            isValidating={isValidating}
           />
         </motion.div>
       )}
