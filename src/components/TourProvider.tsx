@@ -9,20 +9,15 @@ import React, {
 } from 'react';
 import type {
   TouringContext as TouringContextType,
-  TouringReactProps,
+  TourProviderProps,
 } from '../types';
 import { TouringReact } from './TouringReact';
-
-interface TourProviderProps {
-  children: React.ReactNode;
-  props: TouringReactProps;
-}
 
 const TouringContext = createContext<TouringContextType | undefined>(undefined);
 
 export const TourProvider: React.FC<TourProviderProps> = ({
   children,
-  props,
+  ...touringReactProps
 }) => {
   const [currentStepState, setCurrentStepState] = useState(0);
   const [isActive, setIsActive] = useState(false);
@@ -77,7 +72,7 @@ export const TourProvider: React.FC<TourProviderProps> = ({
 
   return (
     <TouringContext.Provider value={value}>
-      {isActive && <TouringReact {...props} />}
+      {isActive && <TouringReact {...touringReactProps} />}
       {children}
     </TouringContext.Provider>
   );

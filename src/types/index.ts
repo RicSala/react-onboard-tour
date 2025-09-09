@@ -80,6 +80,10 @@ export interface TouringReactProps {
   debug?: boolean;
 }
 
+export interface TourProviderProps extends TouringReactProps {
+  children: React.ReactNode;
+}
+
 export interface CardComponentProps {
   step: Step;
   currentStep: number;
