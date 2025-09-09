@@ -17,22 +17,42 @@ export const useWatchForChanges = ({
   useEffect(() => {
     if (!enabled || !config || !targetSelector) return;
 
+    console.log('useWatchForChanges SETUP', {
+      config,
+      targetSelector,
+      enabled,
+      timestamp: Date.now(),
+      stackTrace: new Error().stack?.split('\n').slice(2, 5).join('\n'),
+    });
+
     let observer: MutationObserver | null = null;
     let timeoutId: ReturnType<typeof setTimeout> | null = null;
     let debounceId: ReturnType<typeof setTimeout> | null = null;
+    let hasFoundElement = false;
 
     const target = config.target || targetSelector;
+    console.log('target', target);
     const targetElement = document.querySelector(target);
+    console.log('targetElement', targetElement);
     if (!targetElement) return;
 
     console.log('Setting up MutationObserver for:', target);
 
     // Create the observer
     observer = new MutationObserver(() => {
+      console.log('MutationObserver callback');
+
+      // Skip if we've already found the element and set up the debounce
+      if (hasFoundElement) return;
+
       const foundElement = document.querySelector(config.lookFor);
 
       if (foundElement) {
         console.log('Found expected element:', config.lookFor);
+        hasFoundElement = true;
+
+        // Disconnect observer immediately to prevent further callbacks
+        observer?.disconnect();
 
         // Clear any existing debounce
         if (debounceId) clearTimeout(debounceId);
@@ -42,8 +62,7 @@ export const useWatchForChanges = ({
           console.log('Advancing to next step via DOM change detection');
           onChangeDetected();
 
-          // Clean up
-          observer?.disconnect();
+          // Clean up timeout
           if (timeoutId) clearTimeout(timeoutId);
         }, config.debounce ?? 100);
       }
@@ -66,9 +85,10 @@ export const useWatchForChanges = ({
 
     // Cleanup function
     return () => {
+      console.info('useWatchForChanges cleanup');
       if (observer) observer.disconnect();
       if (timeoutId) clearTimeout(timeoutId);
-      if (debounceId) clearTimeout(debounceId);
+      // if (debounceId) clearTimeout(debounceId);
     };
   }, [config, targetSelector, onChangeDetected, enabled]);
 };

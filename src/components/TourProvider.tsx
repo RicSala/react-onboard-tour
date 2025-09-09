@@ -7,18 +7,22 @@ import React, {
   useMemo,
   useState,
 } from 'react';
-import type { Tour, TouringContext as TouringContextType } from '../types';
+import type {
+  TouringContext as TouringContextType,
+  TouringReactProps,
+} from '../types';
+import { TouringReact } from './TouringReact';
 
 interface TourProviderProps {
   children: React.ReactNode;
-  tours?: Tour[];
+  props: TouringReactProps;
 }
 
 const TouringContext = createContext<TouringContextType | undefined>(undefined);
 
 export const TourProvider: React.FC<TourProviderProps> = ({
   children,
-  tours = [],
+  props,
 }) => {
   const [currentStepState, setCurrentStepState] = useState(0);
   const [isActive, setIsActive] = useState(false);
@@ -72,7 +76,10 @@ export const TourProvider: React.FC<TourProviderProps> = ({
   );
 
   return (
-    <TouringContext.Provider value={value}>{children}</TouringContext.Provider>
+    <TouringContext.Provider value={value}>
+      {isActive && <TouringReact {...props} />}
+      {children}
+    </TouringContext.Provider>
   );
 };
 

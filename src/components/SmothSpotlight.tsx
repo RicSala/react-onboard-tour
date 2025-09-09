@@ -87,7 +87,6 @@ export const SmoothSpotlight: React.FC<SmoothSpotlightProps> = ({
 
   // Get viewport dimensions
   const viewportElement = viewport || document.body;
-  const viewportRect = viewportElement.getBoundingClientRect();
   const viewportScrollHeight = viewportElement.scrollHeight;
   const viewportScrollWidth = viewportElement.scrollWidth;
 
@@ -127,14 +126,6 @@ export const SmoothSpotlight: React.FC<SmoothSpotlightProps> = ({
                   rx: radius,
                   ry: radius,
                 }}
-                exit={{
-                  x: px + pw / 2 - 20,
-                  y: py + ph / 2 - 20,
-                  width: 40,
-                  height: 40,
-                  rx: radius,
-                  ry: radius,
-                }}
                 transition={{ duration: 0.4, ease: 'easeOut' }}
                 fill='black'
               />
@@ -151,81 +142,60 @@ export const SmoothSpotlight: React.FC<SmoothSpotlightProps> = ({
 
       {/* Click blocking overlays - four rectangles */}
       {(blockClicks || onClickOutside) && (
-        <div
-          data-spotlight-blocker='true'
-          style={{
-            position: 'absolute',
-            inset: 0,
-            zIndex: 997,
-            pointerEvents: 'none',
-            height: `${viewportScrollHeight}px`,
-            width: `${viewportScrollWidth}px`,
-          }}
-        >
+        <>
           {/* Top rectangle */}
-          <motion.div
+          <div
             onClick={onClickOutside}
             style={{
-              position: 'absolute',
+              height: Math.max(py, 0),
+              position: 'fixed',
               top: 0,
               left: 0,
               right: 0,
               pointerEvents: 'auto',
             }}
-            animate={{
-              height: Math.max(py, 0),
-            }}
-            transition={{ duration: 0.4, ease: 'easeInOut' }}
           />
 
           {/* Bottom rectangle */}
-          <motion.div
+          <div
             onClick={onClickOutside}
             style={{
-              position: 'absolute',
+              height: Math.max(viewportScrollHeight - py - ph, 0),
+              position: 'fixed',
+              top: py + ph,
+              bottom: 0,
               left: 0,
+              right: 0,
+              pointerEvents: 'auto',
+            }}
+          />
+
+          {/* Left rectangle */}
+          <div
+            onClick={onClickOutside}
+            style={{
+              width: Math.max(px, 0),
+              position: 'fixed',
+              top: 0,
+              left: 0,
+              bottom: 0,
+              pointerEvents: 'auto',
+            }}
+          />
+
+          {/* Right rectangle */}
+          <div
+            onClick={onClickOutside}
+            style={{
+              width: Math.max(viewportScrollWidth - px - pw, 0),
+              position: 'fixed',
+              top: 0,
               right: 0,
               bottom: 0,
               pointerEvents: 'auto',
             }}
-            animate={{
-              height: Math.max(viewportRect.height - (py + ph), 0),
-            }}
-            transition={{ duration: 0.4, ease: 'easeInOut' }}
           />
-
-          {/* Left rectangle */}
-          <motion.div
-            onClick={onClickOutside}
-            style={{
-              position: 'absolute',
-              left: 0,
-              top: 0,
-              pointerEvents: 'auto',
-              height: viewportRect.height,
-            }}
-            animate={{
-              width: Math.max(px, 0),
-            }}
-            transition={{ duration: 0.4, ease: 'easeInOut' }}
-          />
-
-          {/* Right rectangle */}
-          <motion.div
-            onClick={onClickOutside}
-            style={{
-              position: 'absolute',
-              top: 0,
-              right: 0,
-              pointerEvents: 'auto',
-              height: viewportRect.height,
-            }}
-            animate={{
-              left: px + pw,
-            }}
-            transition={{ duration: 0.4, ease: 'easeInOut' }}
-          />
-        </div>
+        </>
       )}
     </>
   );

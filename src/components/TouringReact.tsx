@@ -106,9 +106,12 @@ export const TouringReact = ({
     } else {
       setElement(foundElement);
       refs.setReference(foundElement);
-      // Wait for scroll to finish before showing card
-      scrollIfNeeded(foundElement).then(() => {
-        setShowCard(true);
+      // Allow time for navigation to complete
+      new Promise((resolve) => setTimeout(resolve, 100)).then(() => {
+        // Wait for scroll to finish before showing card
+        scrollIfNeeded(foundElement).then(() => {
+          setShowCard(true);
+        });
       });
     }
     setHasSearched(true);
@@ -149,6 +152,7 @@ export const TouringReact = ({
 
       if (!route) return setCurrentStep(nextStepIndex);
 
+      setShowCard(false);
       navigationAdapter().push(route);
 
       const targetSelector = currentTourSteps[nextStepIndex].selector;
@@ -201,6 +205,7 @@ export const TouringReact = ({
         onStepChange?.(prevStepIndex, currentTour);
 
         if (route) {
+          setShowCard(false);
           navigationAdapter().push(route);
 
           const targetSelector = currentTourSteps[prevStepIndex].selector;

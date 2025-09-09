@@ -8,6 +8,7 @@ export const scrollIfNeeded = (
       rect.top >= padding && rect.bottom <= window.innerHeight - padding;
 
     if (!isInView) {
+      console.log('scrollIfNeeded scrolling to element', element);
       element.scrollIntoView({ behavior: 'smooth', block: 'center' });
       // Just wait for a reasonable amount of time for smooth scroll to complete
       setTimeout(resolve, 500);
