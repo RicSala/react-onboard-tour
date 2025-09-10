@@ -1,14 +1,18 @@
 {
   "name": "@tinystack/touring",
-  "version": "0.1.5",
+  "version": "0.1.6",
   "description": "A flexible onboarding tour library for React applications",
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
   "types": "./dist/index.d.ts",
   "typesVersions": {
     "*": {
-      "v1": ["./dist/v1/index.d.ts"],
-      "v2": ["./dist/v2/index.d.ts"]
+      "v1": [
+        "./dist/v1/index.d.ts"
+      ],
+      "v2": [
+        "./dist/v2/index.d.ts"
+      ]
     }
   },
   "exports": {
