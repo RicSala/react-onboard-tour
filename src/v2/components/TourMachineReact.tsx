@@ -209,6 +209,6 @@ export const useTourState = <TConfig extends TourConfig>() => {
     prevStep: () => tourActor?.send({ type: 'PREV' }),
     endTour: () => tourActor?.send({ type: 'END_TOUR' }),
     skipTour: () => tourActor?.send({ type: 'SKIP_TOUR' }),
-    sendEvent: (event: BaseTourEvent) => tourActor?.send(event),
+    sendEvent: (event: any) => tourActor?.send(event),
   };
 };
