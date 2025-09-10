@@ -11,6 +11,9 @@ importers:
       '@floating-ui/react':
         specifier: ^0.27.16
         version: 0.27.16(react-dom@19.1.1(react@19.1.1))(react@19.1.1)
+      '@tinystack/machine':
+        specifier: ^0.1.0
+        version: 0.1.0
       motion:
         specifier: ^12.23.12
         version: 12.23.12(react-dom@19.1.1(react@19.1.1))(react@19.1.1)
@@ -598,6 +601,9 @@ packages:
 
   '@swc/helpers@0.5.15':
     resolution: {integrity: sha512-JQ5TuMi45Owi4/BIMAJBoSQoOJu12oOk/gADqlcUL9JEdHB8vyjUSsxqeNXnmXHjYKMi2WcYtezGEEhqUI/E2g==}
+
+  '@tinystack/machine@0.1.0':
+    resolution: {integrity: sha512-LozRvS5tJApJ67TqfH0LIjwckY6jJ0d/nt2xH6EntRzjKXpenRYPmo7gKj5SXB3istdThgQqKMxV86hcZ8M/vA==}
 
   '@types/estree@1.0.8':
     resolution: {integrity: sha512-dWHzHa2WqEXI/O1E9OjrocMTKJl2mSrEolh1Iomrv6U+JuNwaHXsXx9bLu5gG7BUWFIN0skIQJQ/L1rIex4X6w==}
@@ -1809,6 +1815,8 @@ snapshots:
   '@swc/helpers@0.5.15':
     dependencies:
       tslib: 2.8.1
+
+  '@tinystack/machine@0.1.0': {}
 
   '@types/estree@1.0.8': {}
 
