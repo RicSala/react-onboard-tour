@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { assign, MachineConfig } from '@tinystack/machine';
 
 // Step content for each async state
@@ -116,7 +117,7 @@ function generateBaseTourMachine<
 
   // Generate states for each expanded state
   expandedStates.forEach((expandedState, stateIndex) => {
-    const { id: stateId, step, stepIndex, subState } = expandedState;
+    const { id: stateId, step, subState } = expandedState;
     const nextExpandedState = expandedStates[stateIndex + 1];
     const prevExpandedState = expandedStates[stateIndex - 1];
     const isLastState = stateIndex === expandedStates.length - 1;

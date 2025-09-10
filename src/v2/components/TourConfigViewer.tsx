@@ -36,11 +36,6 @@ export const TourConfigViewer = ({
     return { type: 'sync', color: 'bg-purple-500' };
   };
 
-  // Helper to format state name for display
-  const formatStateName = (name: string) => {
-    return name.replace(/_/g, ' ').replace(/\b\w/g, (l) => l.toUpperCase());
-  };
-
   // Toggle expanded state
   const toggleExpanded = (stateName: string) => {
     const newExpanded = new Set(expandedStates);
