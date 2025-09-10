@@ -1,6 +1,6 @@
 {
   "name": "@tinystack/touring",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "description": "A flexible onboarding tour library for React applications",
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
@@ -30,8 +30,8 @@
     "dist"
   ],
   "scripts": {
-    "build": "tsup src/index.ts --format cjs,esm --dts --clean",
-    "dev": "tsup src/index.ts --format cjs,esm --dts --watch",
+    "build": "tsup src/v1/index.ts src/v2/index.ts --format cjs,esm --dts --clean --no-splitting && tsup src/index.ts --format cjs,esm --dts --no-splitting --external ./v1/index --external ./v2/index",
+    "dev": "tsup src/v1/index.ts src/v2/index.ts src/index.ts --format cjs,esm --dts --watch --no-splitting --external ./v1/index --external ./v2/index",
     "typecheck": "tsc --noEmit",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
