@@ -11,6 +11,16 @@
       "import": "./dist/index.mjs",
       "require": "./dist/index.js"
     },
+    "./v1": {
+      "types": "./dist/v1/index.d.ts",
+      "import": "./dist/v1/index.mjs",
+      "require": "./dist/v1/index.js"
+    },
+    "./v2": {
+      "types": "./dist/v2/index.d.ts",
+      "import": "./dist/v2/index.mjs",
+      "require": "./dist/v2/index.js"
+    },
     "./styles": {
       "import": "./dist/index.css",
       "require": "./dist/index.css"

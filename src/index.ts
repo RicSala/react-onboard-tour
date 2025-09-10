@@ -1,11 +1,6 @@
-// Main export file for the touring library
-export { TourProvider } from './v1/components/TourProvider';
-export { TouringReact } from './v1/components/TouringReact';
-export { SmoothSpotlight } from './v1/components/SmothSpotlight';
-export { useTour } from './v1/components/TourProvider';
+// Default exports (v1 for backwards compatibility)
+export * from './v1';
 
-// Navigation adapters
-export { useNextNavigationAdapter } from './v1/adapters/nextjs';
-
-// Types
-export type { Step, Tour, NavigationAdapter } from './v1/types';
+// Namespace exports for versioning
+export * as v1 from './v1';
+export * as v2 from './v2';
