@@ -1,5 +1,5 @@
-import { forwardRef } from 'react';
 import { CardProps } from '../types';
+import { forwardRef } from 'react';
 
 const DefaultCard = forwardRef<HTMLDivElement, CardProps>(
   (

@@ -16,9 +16,9 @@ import {
   TourActor,
   type TourMachine as TTourMachine,
 } from '../types';
-import { useTour } from './TourProvider';
 import { CardProps } from '../types';
 import { ComponentType } from 'react';
+import { useTour } from './TourProvider';
 
 interface TourMachineReactProps {
   tourConfig: TourConfig;
@@ -108,7 +108,7 @@ export const TourMachine: React.FC<TourMachineReactProps> = ({
       // Notify subscribers that actor is gone
       notifyActorChange();
     };
-  }, [onComplete, onSkip, tourConfig, tourConfig.id]);
+  }, [tourConfig?.id]);
 
   // Use the actor's snapshot directly with useSyncExternalStore
   const snapshot = useSyncExternalStore(
@@ -156,11 +156,12 @@ export const TourMachine: React.FC<TourMachineReactProps> = ({
       );
       tourActor.send({ type: 'PAGE_CHANGED', page: pathname });
     }
-  }, [pathname, snapshot, snapshot?.value]);
+  }, [pathname, snapshot?.value]);
 
-  return <TourOverlay customCard={customCard} />;
+  return <TourOverlay tourConfig={tourConfig} customCard={customCard} />;
 };
 
+// Generic hook for backwards compatibility
 export const useTourState = <TConfig extends TourConfig>() => {
   const { tourConfig } = useTour();
 

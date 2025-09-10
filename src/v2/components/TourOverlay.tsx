@@ -2,6 +2,7 @@
 
 import { useEffect, useState, ComponentType } from 'react';
 import { useTourState } from './TourMachineReact';
+import { TourConfig } from '../helpers/tourMachineGenerator';
 import {
   autoUpdate,
   flip,
@@ -13,12 +14,13 @@ import { CardProps } from '../types';
 import DefaultCard from './DefaultCard';
 
 interface TourOverlayProps {
+  tourConfig: TourConfig;
   customCard?: ComponentType<CardProps>;
 }
 
-export const TourOverlay = ({ customCard }: TourOverlayProps) => {
+export const TourOverlay = ({ tourConfig, customCard }: TourOverlayProps) => {
   const Card = customCard || DefaultCard;
-  const tour = useTourState();
+  const tour = useTourState<typeof tourConfig>();
   const [elementRect, setElementRect] = useState<DOMRect | null>(null);
 
   const { refs, floatingStyles } = useFloating({
@@ -82,11 +84,7 @@ export const TourOverlay = ({ customCard }: TourOverlayProps) => {
       window.removeEventListener('resize', updateRect);
       window.removeEventListener('scroll', updateRect);
     };
-  }, [
-    tour?.currentStepData?.targetElement,
-    tour?.currentState,
-    tour?.currentStepData,
-  ]);
+  }, [tour?.currentStepData?.targetElement, tour?.currentState]);
 
   // Check after all hooks
   if (!tour || !tour.isActive) return null;

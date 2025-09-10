@@ -1,7 +1,7 @@
 'use client';
 
-import { useState } from 'react';
 import { useTourState } from './TourMachineReact';
+import { useState } from 'react';
 
 export const DebugPanel = () => {
   const tour = useTourState();

@@ -10,19 +10,12 @@ export { DebugPanel } from './components/DebugPanel';
 export { default as DefaultCard } from './components/DefaultCard';
 
 // Helpers
-export { 
+export {
   generateTourMachine,
   getAsyncTaskInfo,
   getAsyncTaskInfoById,
   addEventTrackingToMachine,
   createTourHelpers,
-} from './helpers/tourMachineGenerator';
-
-// Helper Types
-export type {
-  TourStep,
-  TourConfig,
-  ExtractStates,
 } from './helpers/tourMachineGenerator';
 
 // Types

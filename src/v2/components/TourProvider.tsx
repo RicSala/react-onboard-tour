@@ -64,7 +64,7 @@ export const TourProvider: React.FC<TourProviderProps> = ({
       currentTourId,
       tourConfig,
     }),
-    [startTour, endTour, isActive, currentTourId, tourConfig]
+    [startTour, endTour, isActive, currentTourId]
   );
 
   return (
