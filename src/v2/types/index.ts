@@ -130,7 +130,7 @@ export type OverlayStyles = {
 type CardPosition = 'top' | 'bottom' | 'left' | 'right';
 
 export type CardPositioning = {
-  floating: boolean;
-  side: CardPosition;
-  distancePx: number;
+  floating?: boolean;
+  side?: CardPosition;
+  distancePx?: number;
 };

@@ -38,12 +38,6 @@ interface TourMachineReactProps {
 let tourActor: TourActor | null = null;
 let tourMachine: TTourMachine | null = null;
 
-// Subscribers for actor availability changes
-const actorSubscribers = new Set<() => void>();
-
-const notifyActorChange = () => {
-  actorSubscribers.forEach((callback) => callback());
-};
 
 export const TourMachineCore: React.FC<TourMachineReactProps> = ({
   customCard,
@@ -98,9 +92,6 @@ export const TourMachineCore: React.FC<TourMachineReactProps> = ({
     tourActor = tourMachine.createActor();
     console.log('[TourMachineReact] Actor created:', !!tourActor);
 
-    // Notify all subscribers that actor is now available
-    notifyActorChange();
-
     // Subscribe to check for completion or skip
     const unsubscribe = tourActor.subscribe((snapshot) => {
       console.log('[TourMachineReact] State changed:', {
@@ -131,9 +122,6 @@ export const TourMachineCore: React.FC<TourMachineReactProps> = ({
       unsubscribe();
       tourActor?.stop();
       tourActor = null;
-
-      // Notify subscribers that actor is gone
-      notifyActorChange();
     };
   }, [onComplete, onSkip, onTourSkipped, tourConfig, tourConfig.id]);
 
@@ -225,14 +213,7 @@ export const useTourState = <TConfig extends TourConfig>() => {
   }, [tourConfig]);
 
   const snapshot = useSyncExternalStore(
-    (callback) => {
-      actorSubscribers.add(callback);
-      const unsubscribeFromActor = tourActor?.subscribe(callback) || (() => {});
-      return () => {
-        actorSubscribers.delete(callback);
-        unsubscribeFromActor();
-      };
-    },
+    (callback) => tourActor?.subscribe(callback) || (() => {}),
     () => tourActor?.getSnapshot() || null,
     () => null
   );
