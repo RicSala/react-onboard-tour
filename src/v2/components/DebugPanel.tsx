@@ -29,7 +29,7 @@ export const DebugPanel = () => {
   }
 
   return (
-    <div className='fixed bottom-4 left-4 bg-white rounded-lg shadow-xl p-4 w-80 border-2 border-green-200 z-50'>
+    <div className='fixed bottom-4 left-4 bg-white rounded-lg shadow-xl p-4 w-80 border-2 border-green-200 z-[9998]'>
       <div className='flex justify-between items-center mb-3'>
         <h3 className='font-bold text-green-800'>Generated Tour Status</h3>
         <button
@@ -69,7 +69,7 @@ export const DebugPanel = () => {
         <div className='bg-gray-50 p-2 rounded'>
           <span className='font-semibold'>Context:</span>
           <div className='text-xs text-gray-600 font-mono overflow-auto max-h-32'>
-            <pre>{JSON.stringify(tour.snapshot.context, null, 2)}</pre>
+            <pre>{JSON.stringify(tour.snapshot?.context, null, 2)}</pre>
           </div>
         </div>
 

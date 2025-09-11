@@ -15,18 +15,23 @@ import {
   type TourMachine as TTourMachine,
   TourConfig,
   ExtractStates,
+  CardPositioning,
+  OverlayStyles,
 } from '../types';
 import { CardProps } from '../types';
 import { ComponentType } from 'react';
 import { useTour } from './TourProvider';
+import { CARD_POSITIONING_DEFAULT, STYLE_DEFAULT } from '../const';
 
 interface TourMachineReactProps {
-  tourConfig: TourConfig;
   customCard?: ComponentType<CardProps>;
+  closeOnClickOutside?: boolean;
   onComplete?: () => void;
   onSkip?: () => void;
   onNext?: () => void;
   onPrev?: () => void;
+  cardPositioning?: CardPositioning;
+  overlayStyles?: OverlayStyles;
 }
 
 // Global actor reference - only exists when tour is active
@@ -40,14 +45,35 @@ const notifyActorChange = () => {
   actorSubscribers.forEach((callback) => callback());
 };
 
-export const TourMachine: React.FC<TourMachineReactProps> = ({
+export const TourMachineCore: React.FC<TourMachineReactProps> = ({
   customCard,
-  tourConfig,
+  closeOnClickOutside = true,
+  cardPositioning: cardPositioningProp = {
+    floating: true,
+    side: 'top',
+    distancePx: 0,
+  },
+  overlayStyles: overlayStylesProp = STYLE_DEFAULT,
   onComplete,
   onSkip,
 }) => {
   const pathname = usePathname();
   const router = useRouter();
+  const overlayStyles = useMemo(() => {
+    return {
+      ...STYLE_DEFAULT,
+      ...overlayStylesProp,
+    };
+  }, [overlayStylesProp]);
+
+  const cardPositioning = useMemo(() => {
+    return {
+      ...CARD_POSITIONING_DEFAULT,
+      ...cardPositioningProp,
+    };
+  }, [cardPositioningProp]);
+
+  const { tourConfig, onTourSkipped } = useTour();
 
   // Initialize actor on mount
   useEffect(() => {
@@ -91,6 +117,7 @@ export const TourMachine: React.FC<TourMachineReactProps> = ({
       // Check if tour was skipped
       if (snapshot.value === 'skipped') {
         console.log('[TourMachineReact] Tour was skipped');
+        onTourSkipped?.();
         onSkip?.();
       }
     });
@@ -108,7 +135,7 @@ export const TourMachine: React.FC<TourMachineReactProps> = ({
       // Notify subscribers that actor is gone
       notifyActorChange();
     };
-  }, [tourConfig?.id]);
+  }, [onComplete, onSkip, onTourSkipped, tourConfig, tourConfig.id]);
 
   // Use the actor's snapshot directly with useSyncExternalStore
   const snapshot = useSyncExternalStore(
@@ -144,7 +171,7 @@ export const TourMachine: React.FC<TourMachineReactProps> = ({
 
   // Detect page changes and notify the state machine
   useEffect(() => {
-    if (!snapshot || !tourActor) return;
+    if (!snapshot?.value || !tourActor) return;
 
     // Send PAGE_CHANGED for any active state (not idle or completed)
     if (snapshot.value !== 'idle' && snapshot.value !== 'completed') {
@@ -158,14 +185,41 @@ export const TourMachine: React.FC<TourMachineReactProps> = ({
     }
   }, [pathname, snapshot?.value]);
 
-  return <TourOverlay tourConfig={tourConfig} customCard={customCard} />;
+  // keyboard control
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'ArrowRight') return tourActor?.send({ type: 'NEXT' });
+      if (event.key === 'ArrowLeft') return tourActor?.send({ type: 'PREV' });
+      if (event.key === 'Escape') return tourActor?.send({ type: 'SKIP_TOUR' });
+    };
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, []);
+
+  return (
+    <TourOverlay
+      cardPositioning={cardPositioning}
+      overlayStyles={overlayStyles}
+      customCard={customCard}
+      onOverlayClick={
+        closeOnClickOutside
+          ? () => tourActor?.send({ type: 'SKIP_TOUR' })
+          : undefined
+      }
+    />
+  );
 };
 
-// Generic hook for backwards compatibility
+// the same as core but get is active from the context and conditionally render the core
+// have the same props as core and pass all of them to the core
+export const TourMachine = (props: TourMachineReactProps) => {
+  const { isActive } = useTour();
+  return isActive ? <TourMachineCore {...props} /> : null;
+};
+
 export const useTourState = <TConfig extends TourConfig>() => {
   const { tourConfig } = useTour();
 
-  // Always call hooks in the same order - move useMemo before any conditional returns
   const tourHelpers = useMemo(() => {
     return createTourHelpers(tourConfig);
   }, [tourConfig]);
@@ -183,25 +237,35 @@ export const useTourState = <TConfig extends TourConfig>() => {
     () => null
   );
 
-  if (!snapshot || !tourActor) return null;
-
-  const isActive = !['idle', 'completed', 'skipped'].includes(snapshot.value);
+  const currentState = useMemo(() => {
+    return snapshot?.value as ExtractStates<TConfig>;
+  }, [snapshot]);
 
   // Get current step data from context
-  const currentStepData = snapshot.context.targetElement
-    ? {
-        targetElement: snapshot.context.targetElement,
-        title: snapshot.context.title,
-        content: snapshot.context.content,
-        page: snapshot.context.currentPage,
-      }
-    : null;
+  const currentStepData = useMemo(
+    () =>
+      snapshot?.context.targetElement
+        ? {
+            targetElement: snapshot?.context.targetElement,
+            title: snapshot?.context.title,
+            content: snapshot?.context.content,
+            page: snapshot?.context.currentPage,
+          }
+        : null,
+    [snapshot]
+  );
+
+  if (!snapshot || !tourActor) return null;
+
+  const isActive =
+    !snapshot?.value ||
+    !['idle', 'completed', 'skipped'].includes(snapshot?.value);
 
   return {
     isActive,
-    currentState: snapshot.value as ExtractStates<TConfig>,
+    currentState,
     currentStepData,
-    currentStepIndex: isActive ? tourHelpers?.getStepIndex(snapshot.value) : -1,
+    currentStepIndex: isActive ? tourHelpers?.getStepIndex(currentState) : -1,
     totalSteps: tourHelpers?.getTotalSteps() || 0,
     canGoNext: tourActor.can({ type: 'NEXT' }),
     canGoPrev: tourActor.can({ type: 'PREV' }),
@@ -210,6 +274,7 @@ export const useTourState = <TConfig extends TourConfig>() => {
     prevStep: () => tourActor?.send({ type: 'PREV' }),
     endTour: () => tourActor?.send({ type: 'END_TOUR' }),
     skipTour: () => tourActor?.send({ type: 'SKIP_TOUR' }),
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     sendEvent: (event: any) => tourActor?.send(event),
   };
 };

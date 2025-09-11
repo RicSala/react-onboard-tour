@@ -120,3 +120,17 @@ type ExtractNavigationStates<Step extends TourStep> = Step extends {
               | `navigatingTo_${Id & string}_success`
           : never)
   : never;
+
+export type OverlayStyles = {
+  radius?: number;
+  padding?: number;
+  opacity?: number;
+  colorRgb?: string;
+};
+type CardPosition = 'top' | 'bottom' | 'left' | 'right';
+
+export type CardPositioning = {
+  floating: boolean;
+  side: CardPosition;
+  distancePx: number;
+};
