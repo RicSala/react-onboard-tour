@@ -1,6 +1,6 @@
 {
   "name": "@tinystack/touring",
-  "version": "0.1.7",
+  "version": "0.1.8",
   "description": "A flexible onboarding tour library for React applications",
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
