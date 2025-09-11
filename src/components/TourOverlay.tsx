@@ -33,13 +33,9 @@ export const TourOverlay = ({
   const tour = useTourState();
   const [elementRect, setElementRect] = useState<DOMRect | null>(null);
 
-  const currentStepData = useMemo(() => {
-    return tour?.currentStepData;
-  }, [tour?.currentStepData]);
-
   const targetElement = useMemo(
-    () => currentStepData?.targetElement,
-    [currentStepData]
+    () => tour?.currentStepData?.targetElement,
+    [tour?.currentStepData]
   );
 
   const { refs, floatingStyles } = useFloating({
@@ -154,10 +150,10 @@ export const TourOverlay = ({
                     ry: 10,
                   }}
                   animate={{
-                    x: cutoutX,
-                    y: cutoutY,
-                    width: cutoutWidth,
-                    height: cutoutHeight,
+                    x: targetElement ? cutoutX : cutoutX + cutoutWidth / 2,
+                    y: targetElement ? cutoutY : cutoutY + cutoutHeight / 2,
+                    width: targetElement ? cutoutWidth : 0,
+                    height: targetElement ? cutoutHeight : 0,
                     rx: overlayStyles.radius,
                     ry: overlayStyles.radius,
                   }}
@@ -191,24 +187,30 @@ export const TourOverlay = ({
       )}
 
       {/* Tooltip Card */}
-      {elementRect && (
-        <Card
-          className='fixed z-[999] pointer-events-auto'
-          style={floatingStyles}
-          title={tour.currentStepData?.title}
-          content={tour.currentStepData?.content}
-          currentStepIndex={tour.currentStepIndex}
-          totalSteps={tour.totalSteps}
-          canGoNext={tour.canGoNext!}
-          canGoPrev={tour.canGoPrev!}
-          nextStep={tour.nextStep}
-          prevStep={tour.prevStep}
-          skipTour={tour.skipTour}
-          endTour={tour.endTour}
-          ref={refs.setFloating}
-        />
-      )}
-
+      <Card
+        className='fixed z-[999] pointer-events-auto'
+        style={
+          targetElement
+            ? floatingStyles
+            : {
+                position: 'fixed',
+                top: '50%',
+                left: '50%',
+                transform: 'translate(-50%, -50%)',
+              }
+        }
+        title={tour.currentStepData?.title}
+        content={tour.currentStepData?.content}
+        currentStepIndex={tour.currentStepIndex}
+        totalSteps={tour.totalSteps}
+        canGoNext={tour.canGoNext!}
+        canGoPrev={tour.canGoPrev!}
+        nextStep={tour.nextStep}
+        prevStep={tour.prevStep}
+        skipTour={tour.skipTour}
+        endTour={tour.endTour}
+        ref={refs.setFloating}
+      />
       {/* Blocking panes */}
 
       <>

@@ -224,12 +224,12 @@ export const useTourState = <TConfig extends TourConfig>() => {
   // Get current step data from context
   const currentStepData = useMemo(
     () =>
-      snapshot?.context.targetElement
+      snapshot?.context
         ? {
-            targetElement: snapshot?.context.targetElement,
-            title: snapshot?.context.title,
-            content: snapshot?.context.content,
-            page: snapshot?.context.currentPage,
+            targetElement: snapshot.context.targetElement,
+            title: snapshot.context.title,
+            content: snapshot.context.content,
+            page: snapshot.context.currentPage,
           }
         : null,
     [snapshot]
