@@ -5,9 +5,7 @@ import { usePathname, useRouter } from 'next/navigation';
 import { TourOverlay } from './TourOverlay';
 import {
   createTourHelpers,
-  ExtractStates,
   generateTourMachine,
-  TourConfig,
 } from '../helpers/tourMachineGenerator';
 import { StateMachine } from '@tinystack/machine';
 import {
@@ -15,6 +13,8 @@ import {
   BaseTourEvent,
   TourActor,
   type TourMachine as TTourMachine,
+  TourConfig,
+  ExtractStates,
 } from '../types';
 import { CardProps } from '../types';
 import { ComponentType } from 'react';

@@ -2,7 +2,7 @@
 
 import { useEffect, useState, ComponentType } from 'react';
 import { useTourState } from './TourMachineReact';
-import { TourConfig } from '../helpers/tourMachineGenerator';
+import { TourConfig } from '../types';
 import {
   autoUpdate,
   flip,

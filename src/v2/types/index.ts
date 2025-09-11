@@ -42,3 +42,81 @@ export interface CardProps {
   showControls?: boolean;
   showSkip?: boolean;
 }
+
+// Step content for each async state
+export interface StepContent {
+  targetElement: string;
+  title: string;
+  content: string;
+}
+
+// Tour step configuration - now with discriminated union for sync/async
+export type TourStep =
+  | {
+      id: string;
+      type?: 'sync'; // Default type
+      page: string;
+      targetElement: string;
+      title: string;
+      content: string;
+      autoAdvance?: number; // milliseconds
+      canPrev?: boolean; // Whether to allow backward navigation
+      canSkip?: boolean; // Whether to allow skipping this step
+    }
+  | {
+      id: string;
+      type: 'async';
+      page: string;
+      content: {
+        pending: StepContent;
+        processing: StepContent;
+        success: StepContent;
+      };
+      events?: {
+        start?: string;
+        success?: string;
+        failed?: string;
+      };
+      canPrev?: boolean; // Whether to allow backward navigation
+      canSkip?: boolean; // Whether to allow skipping this step
+    };
+
+export interface TourConfig {
+  id: string;
+  steps: TourStep[];
+  allowPageNavigation?: boolean;
+  allowSkip?: boolean;
+}
+
+// Type helper to extract all possible state values from a tour config
+export type ExtractStates<T extends TourConfig> =
+  | 'idle'
+  | 'completed'
+  | 'skipped'
+  | ExtractStepStates<T['steps'][number]>
+  | ExtractNavigationStates<T['steps'][number]>;
+
+type ExtractStepStates<Step extends TourStep> = Step extends {
+  type: 'async';
+  id: infer Id;
+}
+  ?
+      | `${Id & string}_pending`
+      | `${Id & string}_processing`
+      | `${Id & string}_success`
+  : Step extends { id: infer Id }
+  ? Id & string
+  : never;
+
+type ExtractNavigationStates<Step extends TourStep> = Step extends {
+  id: infer Id;
+}
+  ?
+      | `navigatingTo_${Id & string}`
+      | (Step extends { type: 'async' }
+          ?
+              | `navigatingTo_${Id & string}_pending`
+              | `navigatingTo_${Id & string}_processing`
+              | `navigatingTo_${Id & string}_success`
+          : never)
+  : never;

@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { TourConfig } from '../helpers/tourMachineGenerator';
+import { TourConfig } from '../types';
 
 interface TourConfigViewerProps {
   tourConfig: TourConfig;

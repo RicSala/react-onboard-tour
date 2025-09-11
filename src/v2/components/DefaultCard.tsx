@@ -92,7 +92,7 @@ const DefaultCard = forwardRef<HTMLDivElement, CardProps>(
             }}
             disabled={!canGoPrev}
           >
-            Previous
+            Previous!
           </button>
           <span style={{ color: '#6B7280', whiteSpace: 'nowrap' }}>
             {currentStepIndex + 1} of {totalSteps}

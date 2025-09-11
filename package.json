@@ -42,13 +42,14 @@
   "scripts": {
     "build": "tsup src/v1/index.ts src/v2/index.ts --format cjs,esm --dts --clean --no-splitting && tsup src/index.ts --format cjs,esm --dts --no-splitting --external ./v1/index --external ./v2/index",
     "dev": "tsup src/v1/index.ts src/v2/index.ts src/index.ts --format cjs,esm --dts --watch --no-splitting --external ./v1/index --external ./v2/index",
-    "typecheck": "tsc --noEmit",
+    "type:check": "tsc --noEmit --pretty",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "prepublishOnly": "pnpm run build",
     "link": "pnpm link --global",
     "unlink": "pnpm unlink --global",
-    "dev:setup": "./scripts/setup-dev.sh"
+    "dev:setup": "./scripts/setup-dev.sh",
+    "prepare": "husky"
   },
   "keywords": [
     "react",
@@ -78,6 +79,7 @@
     "@typescript-eslint/parser": "^8.42.0",
     "eslint": "^9.35.0",
     "eslint-plugin-react-hooks": "^5.2.0",
+    "husky": "^9.1.7",
     "next": "^15.5.2",
     "tsup": "^8.5.0",
     "typescript": "^5.9.2"

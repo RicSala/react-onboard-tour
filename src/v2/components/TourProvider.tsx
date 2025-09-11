@@ -9,7 +9,7 @@ import React, {
   ReactNode,
 } from 'react';
 import { TourMachine } from './TourMachineReact';
-import { TourConfig } from '../helpers/tourMachineGenerator';
+import { TourConfig } from '../types';
 import DefaultCard from './DefaultCard';
 
 interface TourContextType {
@@ -64,7 +64,7 @@ export const TourProvider: React.FC<TourProviderProps> = ({
       currentTourId,
       tourConfig,
     }),
-    [startTour, endTour, isActive, currentTourId]
+    [startTour, endTour, isActive, currentTourId, tourConfig]
   );
 
   return (

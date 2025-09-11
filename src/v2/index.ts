@@ -25,4 +25,8 @@ export type {
   TourActor,
   TourMachine as TourMachineType,
   CardProps,
+  TourStep,
+  TourConfig,
+  StepContent,
+  ExtractStates,
 } from './types';
