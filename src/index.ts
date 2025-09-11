@@ -1,6 +1,31 @@
-// Default exports (v1 for backwards compatibility)
-export * from './v1/index';
+// Components
+export { TourProvider, useTour } from './components/TourProvider';
+export { TourMachine, useTourState } from './components/TourMachineReact';
+export { TourOverlay } from './components/TourOverlay';
+export { TourConfigViewer } from './components/TourConfigViewer';
+export { DebugPanel } from './components/DebugPanel';
+export { default as DefaultCard } from './components/DefaultCard';
 
-// Namespace exports for versioning
-export * as v1 from './v1/index';
-export * as v2 from './v2/index';
+// Helpers
+export {
+  generateTourMachine,
+  getAsyncTaskInfo,
+  getAsyncTaskInfoById,
+  addEventTrackingToMachine,
+  createTourHelpers,
+} from './helpers/tourMachineGenerator';
+
+// Types
+export type {
+  TourContext,
+  BaseTourEvent,
+  TourActor,
+  TourMachine as TourMachineType,
+  CardProps,
+  TourStep,
+  TourConfig,
+  StepContent,
+  ExtractStates,
+  OverlayStyles,
+  CardPositioning,
+} from './types';

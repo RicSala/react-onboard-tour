@@ -11,7 +11,7 @@ import {
 } from '@floating-ui/react';
 import { CardPositioning, CardProps, OverlayStyles } from '../types';
 import DefaultCard from './DefaultCard';
-import { scrollIfNeeded } from '../../v1/utils/scrollIfNeeded';
+import { scrollIfNeeded } from '../helpers/scrollIfNeeded';
 import { motion } from 'motion/react';
 
 interface TourOverlayProps {

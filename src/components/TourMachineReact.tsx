@@ -38,7 +38,6 @@ interface TourMachineReactProps {
 let tourActor: TourActor | null = null;
 let tourMachine: TTourMachine | null = null;
 
-
 export const TourMachineCore: React.FC<TourMachineReactProps> = ({
   customCard,
   closeOnClickOutside = true,

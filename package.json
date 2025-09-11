@@ -5,31 +5,11 @@
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
   "types": "./dist/index.d.ts",
-  "typesVersions": {
-    "*": {
-      "v1": [
-        "./dist/v1/index.d.ts"
-      ],
-      "v2": [
-        "./dist/v2/index.d.ts"
-      ]
-    }
-  },
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
       "import": "./dist/index.mjs",
       "require": "./dist/index.js"
-    },
-    "./v1": {
-      "types": "./dist/v1/index.d.ts",
-      "import": "./dist/v1/index.mjs",
-      "require": "./dist/v1/index.js"
-    },
-    "./v2": {
-      "types": "./dist/v2/index.d.ts",
-      "import": "./dist/v2/index.mjs",
-      "require": "./dist/v2/index.js"
     },
     "./styles": {
       "import": "./dist/index.css",
@@ -40,8 +20,8 @@
     "dist"
   ],
   "scripts": {
-    "build": "tsup src/v1/index.ts src/v2/index.ts --format cjs,esm --dts --clean --no-splitting && tsup src/index.ts --format cjs,esm --dts --no-splitting --external ./v1/index --external ./v2/index",
-    "dev": "tsup src/v1/index.ts src/v2/index.ts src/index.ts --format cjs,esm --dts --watch --no-splitting --external ./v1/index --external ./v2/index",
+    "build": "tsup src/index.ts --format cjs,esm --dts --clean --no-splitting",
+    "dev": "tsup src/index.ts --format cjs,esm --dts --watch --no-splitting",
     "type:check": "tsc --noEmit --pretty",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
