@@ -4,7 +4,7 @@ import { StateMachine } from '@tinystack/machine';
 export type TourContext = {
   tourId: string;
   currentPage: string;
-  targetElement: string;
+  targetElement?: string;
   title: string;
   content: string;
   autoAdvanceTimer?: any;
@@ -45,7 +45,7 @@ export interface CardProps {
 
 // Step content for each async state
 export interface StepContent {
-  targetElement: string;
+  targetElement?: string;
   title: string;
   content: string;
 }
@@ -56,7 +56,7 @@ export type TourStep =
       id: string;
       type?: 'sync'; // Default type
       page: string;
-      targetElement: string;
+      targetElement?: string;
       title: string;
       content: string;
       autoAdvance?: number; // milliseconds
