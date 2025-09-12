@@ -226,6 +226,21 @@ function generateBaseTourMachine<
                   },
                 ],
               };
+        
+        // Handle automatic navigation after success (e.g., login redirects)
+        if (nextPage !== step.page) {
+          state.on.PAGE_CHANGED = {
+            target: nextExpandedState.id,
+            guards: [
+              {
+                condition: (context: any, event: any) => {
+                  // If page changed to the next step's page, auto-advance
+                  return event.page === nextExpandedState.step.page && event.tourId === context.tourId;
+                },
+              },
+            ],
+          };
+        }
       } else {
         state.on.NEXT = {
           target: 'completed',

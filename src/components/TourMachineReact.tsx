@@ -37,12 +37,8 @@ export let tourMachine: TTourMachine | null = null;
 export const TourMachineCore: React.FC<TourMachineReactProps> = ({
   customCard,
   closeOnClickOutside = true,
-  cardPositioning: cardPositioningProp = {
-    floating: true,
-    side: 'top',
-    distancePx: 0,
-  },
-  overlayStyles: overlayStylesProp = STYLE_DEFAULT,
+  cardPositioning: cardPositioningProp,
+  overlayStyles: overlayStylesProp,
   onComplete,
   onSkip,
 }) => {
@@ -68,8 +64,22 @@ export const TourMachineCore: React.FC<TourMachineReactProps> = ({
     handleComplete: () => void;
   };
 
-  // Initialize actor on mount
+  // on pop state skip the tour and clean up the actor
   useEffect(() => {
+    const handlePopState = () => {
+      tourActor?.send({ type: 'SKIP_TOUR', tourId: tourConfig.id });
+    };
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, [tourConfig.id]);
+
+  // Initialize actor only once per tour
+  useEffect(() => {
+    // If actor already exists for this tour, don't recreate it
+    if (tourActor && tourMachine?.config.id === tourConfig.id) {
+      return;
+    }
+
     if (!tourMachine || tourMachine.config.id !== tourConfig.id) {
       const machineConfig = generateTourMachine<TourContext, BaseTourEvent>(
         tourConfig
@@ -83,35 +93,42 @@ export const TourMachineCore: React.FC<TourMachineReactProps> = ({
     // Subscribe to check for completion or skip
     const unsubscribe = tourActor.subscribe((snapshot) => {
       // Check if tour completed normally
-      if (snapshot.value === 'completed') {
-        handleComplete?.();
-        onComplete?.();
-      }
-
-      // Check if tour was skipped
-      if (snapshot.value === 'skipped') {
-        handleSkip?.();
-        onSkip?.();
+      if (snapshot.value === 'completed' || snapshot.value === 'skipped') {
+        tourActor?.stop();
+        tourActor = null;
+        tourMachine = null;
       }
     });
 
     tourActor.start();
     tourActor.send({ type: 'START_TOUR', tourId: tourConfig.id });
 
-    // Cleanup on unmount
+    // Only cleanup on true unmount (when component is removed)
     return () => {
       unsubscribe();
       tourActor?.stop();
       tourActor = null;
+      tourMachine = null;
     };
-  }, [
-    onComplete,
-    onSkip,
-    handleSkip,
-    handleComplete,
-    tourConfig,
-    tourConfig.id,
-  ]);
+  }, [tourConfig]); // Only depend on tour ID, not the whole config object
+
+  // Handle completion/skip callbacks in a separate effect
+  useEffect(() => {
+    if (!tourActor) return;
+
+    const unsubscribe = tourActor.subscribe((snapshot) => {
+      if (snapshot.value === 'completed') {
+        handleComplete?.();
+        onComplete?.();
+      }
+      if (snapshot.value === 'skipped') {
+        handleSkip?.();
+        onSkip?.();
+      }
+    });
+
+    return unsubscribe;
+  }, [onComplete, onSkip, handleSkip, handleComplete]);
 
   // Use the actor's snapshot directly with useSyncExternalStore
   const snapshot = useSyncExternalStore(
@@ -123,7 +140,6 @@ export const TourMachineCore: React.FC<TourMachineReactProps> = ({
   // Auto-navigation logic
   useEffect(() => {
     if (!snapshot || !tourActor) return;
-
     const targetPage = snapshot.context.currentPage;
     if (targetPage && targetPage !== pathname) {
       // For navigating states, always navigate

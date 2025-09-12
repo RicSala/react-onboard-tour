@@ -14,7 +14,7 @@ export const DebugPanel = ({ tourId }: { tourId: string }) => {
     !tour.snapshot?.context
   ) {
     return (
-      <div className='fixed bottom-4 left-4 bg-gray-200 text-gray-600 px-3 py-2 rounded-lg shadow-lg text-sm z-50'>
+      <div className='fixed bottom-4 left-4 bg-gray-200 text-gray-600 px-3 py-2 rounded-lg shadow-lg text-sm z-[9998]'>
         No active tour
       </div>
     );
@@ -24,7 +24,7 @@ export const DebugPanel = ({ tourId }: { tourId: string }) => {
     return (
       <button
         onClick={() => setIsOpen(true)}
-        className='fixed bottom-4 left-4 bg-green-600 text-white px-3 py-2 rounded-lg shadow-lg text-sm z-50'
+        className='fixed bottom-4 left-4 bg-green-600 text-white px-3 py-2 rounded-lg shadow-lg text-sm z-[9998]'
       >
         Show Debug Info
       </button>

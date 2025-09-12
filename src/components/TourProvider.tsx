@@ -74,7 +74,7 @@ export const TourProvider: React.FC<TourProviderProps> = ({
 export const useTourContext = () => {
   const context = useContext(TourContext);
   if (context === undefined) {
-    throw new Error('useOptimizedTour must be used within an TourProvider');
+    throw new Error('useTourContext must be used within an TourProvider');
   }
   return context;
 };
