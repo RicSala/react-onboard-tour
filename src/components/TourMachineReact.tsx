@@ -168,16 +168,23 @@ export const TourMachineCore: React.FC<TourMachineReactProps> = ({
         'in state:',
         snapshot.value
       );
-      tourActor.send({ type: 'PAGE_CHANGED', page: pathname });
+      tourActor.send({
+        type: 'PAGE_CHANGED',
+        page: pathname,
+        tourId: tourConfig.id,
+      });
     }
   }, [pathname, snapshot?.value]);
 
   // keyboard control
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === 'ArrowRight') return tourActor?.send({ type: 'NEXT' });
-      if (event.key === 'ArrowLeft') return tourActor?.send({ type: 'PREV' });
-      if (event.key === 'Escape') return tourActor?.send({ type: 'SKIP_TOUR' });
+      if (event.key === 'ArrowRight')
+        return tourActor?.send({ type: 'NEXT', tourId: tourConfig.id });
+      if (event.key === 'ArrowLeft')
+        return tourActor?.send({ type: 'PREV', tourId: tourConfig.id });
+      if (event.key === 'Escape')
+        return tourActor?.send({ type: 'SKIP_TOUR', tourId: tourConfig.id });
     };
     document.addEventListener('keydown', handleKeyDown);
     return () => document.removeEventListener('keydown', handleKeyDown);
@@ -190,7 +197,7 @@ export const TourMachineCore: React.FC<TourMachineReactProps> = ({
       customCard={customCard}
       onOverlayClick={
         closeOnClickOutside
-          ? () => tourActor?.send({ type: 'SKIP_TOUR' })
+          ? () => tourActor?.send({ type: 'SKIP_TOUR', tourId: tourConfig.id })
           : undefined
       }
     />
@@ -247,13 +254,14 @@ export const useTourState = <TConfig extends TourConfig>() => {
     currentStepData,
     currentStepIndex: isActive ? tourHelpers?.getStepIndex(currentState) : -1,
     totalSteps: tourHelpers?.getTotalSteps() || 0,
-    canGoNext: tourActor.can({ type: 'NEXT' }),
-    canGoPrev: tourActor.can({ type: 'PREV' }),
+    canGoNext: tourActor.can({ type: 'NEXT', tourId: tourConfig.id }),
+    canGoPrev: tourActor.can({ type: 'PREV', tourId: tourConfig.id }),
     snapshot,
-    nextStep: () => tourActor?.send({ type: 'NEXT' }),
-    prevStep: () => tourActor?.send({ type: 'PREV' }),
-    endTour: () => tourActor?.send({ type: 'END_TOUR' }),
-    skipTour: () => tourActor?.send({ type: 'SKIP_TOUR' }),
+    nextStep: () => tourActor?.send({ type: 'NEXT', tourId: tourConfig.id }),
+    prevStep: () => tourActor?.send({ type: 'PREV', tourId: tourConfig.id }),
+    endTour: () => tourActor?.send({ type: 'END_TOUR', tourId: tourConfig.id }),
+    skipTour: () =>
+      tourActor?.send({ type: 'SKIP_TOUR', tourId: tourConfig.id }),
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     sendEvent: (event: any) => tourActor?.send(event),
   };

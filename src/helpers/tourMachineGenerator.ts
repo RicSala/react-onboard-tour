@@ -6,16 +6,17 @@ let globalTimerRef: any = null;
 
 export function generateTourMachine<
   TContext extends Record<string, any>,
-  TEvent extends { type: string }
+  TEvent extends { type: string; tourId: string }
 >(config: TourConfig): MachineConfig<TContext, TEvent> {
   const baseMachine = generateBaseTourMachine<TContext, TEvent>(config);
-  return addEventTrackingToMachine(baseMachine);
+  const withEventTracking = addEventTrackingToMachine(baseMachine);
+  return withEventTracking; // Skip the guards helper for now
 }
 
 // Generate the base machine without event tracking
 function generateBaseTourMachine<
   TContext extends Record<string, any>,
-  TEvent extends { type: string }
+  TEvent extends { type: string; tourId: string }
 >(config: TourConfig): MachineConfig<TContext, TEvent> {
   const states: any = {};
 
@@ -62,9 +63,17 @@ function generateBaseTourMachine<
       START_TOUR: {
         target: expandedStates[0]?.id || 'completed',
         actions: [
-          assign((context: any, event: any) => ({
-            tourId: event.type === 'START_TOUR' ? event.tourId : context.tourId,
-          })),
+          assign((context: any, event: any) => {
+            console.log(
+              '[START_TOUR] Setting tourId from',
+              context.tourId,
+              'to',
+              event.tourId
+            );
+            return {
+              tourId: event.tourId,
+            };
+          }),
         ],
       },
     },
@@ -202,26 +211,125 @@ function generateBaseTourMachine<
         const nextPage = nextExpandedState?.step.page;
         state.on.NEXT =
           nextPage !== step.page
-            ? { target: `navigatingTo_${nextExpandedState.id}` }
-            : { target: nextExpandedState.id };
+            ? {
+                target: `navigatingTo_${nextExpandedState.id}`,
+                guards: [
+                  {
+                    condition: (context: any, event: any) => {
+                      console.log(
+                        '[GUARD] NEXT event (async success) - context.tourId:',
+                        context.tourId,
+                        'event.tourId:',
+                        event.tourId,
+                        'match:',
+                        event.tourId === context.tourId
+                      );
+                      return event.tourId === context.tourId;
+                    },
+                  },
+                ],
+              }
+            : {
+                target: nextExpandedState.id,
+                guards: [
+                  {
+                    condition: (context: any, event: any) => {
+                      console.log(
+                        '[GUARD] NEXT event (async success) - context.tourId:',
+                        context.tourId,
+                        'event.tourId:',
+                        event.tourId,
+                        'match:',
+                        event.tourId === context.tourId
+                      );
+                      return event.tourId === context.tourId;
+                    },
+                  },
+                ],
+              };
       } else {
-        state.on.NEXT = { target: 'completed' };
+        state.on.NEXT = {
+          target: 'completed',
+          guards: [
+            {
+              condition: (context: any, event: any) => {
+                console.log(
+                  '[GUARD] NEXT to completed - context.tourId:',
+                  context.tourId,
+                  'event.tourId:',
+                  event.tourId,
+                  'match:',
+                  event.tourId === context.tourId
+                );
+                return event.tourId === context.tourId;
+              },
+            },
+          ],
+        };
       }
 
-      // Allow going back to pending
-      state.on.PREV = {
-        target: `${step.id}_pending`,
-      };
+      // Don't allow going back from success state to prevent re-doing async task
     } else {
       // Regular sync state
       if (!isLastState) {
         const nextPage = nextExpandedState?.step.page;
         state.on.NEXT =
           nextPage !== step.page
-            ? { target: `navigatingTo_${nextExpandedState.id}` }
-            : { target: nextExpandedState.id };
+            ? {
+                target: `navigatingTo_${nextExpandedState.id}`,
+                guards: [
+                  {
+                    condition: (context: any, event: any) => {
+                      console.log(
+                        '[GUARD] NEXT event (sync) - context.tourId:',
+                        context.tourId,
+                        'event.tourId:',
+                        event.tourId,
+                        'match:',
+                        event.tourId === context.tourId
+                      );
+                      return event.tourId === context.tourId;
+                    },
+                  },
+                ],
+              }
+            : {
+                target: nextExpandedState.id,
+                guards: [
+                  {
+                    condition: (context: any, event: any) => {
+                      console.log(
+                        '[GUARD] NEXT event (sync) - context.tourId:',
+                        context.tourId,
+                        'event.tourId:',
+                        event.tourId,
+                        'match:',
+                        event.tourId === context.tourId
+                      );
+                      return event.tourId === context.tourId;
+                    },
+                  },
+                ],
+              };
       } else {
-        state.on.NEXT = { target: 'completed' };
+        state.on.NEXT = {
+          target: 'completed',
+          guards: [
+            {
+              condition: (context: any, event: any) => {
+                console.log(
+                  '[GUARD] NEXT to completed (sync) - context.tourId:',
+                  context.tourId,
+                  'event.tourId:',
+                  event.tourId,
+                  'match:',
+                  event.tourId === context.tourId
+                );
+                return event.tourId === context.tourId;
+              },
+            },
+          ],
+        };
       }
 
       if (prevExpandedState && step.canPrev !== false) {
@@ -277,8 +385,12 @@ function generateBaseTourMachine<
           on: {
             PAGE_CHANGED: {
               target: nextExpandedState.id,
-              guard: ({ event }: any) =>
-                event.page === nextExpandedState.step.page,
+              guards: [
+                {
+                  condition: (_context: any, event: any) =>
+                    event.page === nextExpandedState.step.page,
+                },
+              ],
             },
             NEXT: nextExpandedState.id,
             END_TOUR: 'completed',
@@ -323,8 +435,12 @@ function generateBaseTourMachine<
           on: {
             PAGE_CHANGED: {
               target: targetId,
-              guard: ({ event }: any) =>
-                event.page === prevExpandedState.step.page,
+              guards: [
+                {
+                  condition: (_context: any, event: any) =>
+                    event.page === prevExpandedState.step.page,
+                },
+              ],
             },
             PREV: targetId,
             END_TOUR: 'completed',
@@ -386,7 +502,13 @@ function generateBaseTourMachine<
     id: config.id,
     initial: 'idle',
     states,
-    context: {} as any,
+    context: {
+      tourId: config.id,
+      currentPage: '',
+      targetElement: '',
+      title: '',
+      content: '',
+    } as any,
   };
 }
 
@@ -424,7 +546,7 @@ export function getAsyncTaskInfoById<T extends TourConfig>(
 // Helper function to add event tracking to all transitions in a machine config
 export function addEventTrackingToMachine<
   TContext extends Record<string, any>,
-  TEvent extends { type: string }
+  TEvent extends { type: string; tourId: string }
 >(
   machineConfig: MachineConfig<TContext, TEvent>
 ): MachineConfig<TContext, TEvent> {
@@ -463,6 +585,97 @@ export function addEventTrackingToMachine<
     for (const eventType in on) {
       processedOn[eventType] = processTransition(on[eventType]);
     }
+    return processedOn;
+  };
+
+  const processState = (state: any): any => {
+    if (!state) return state;
+
+    const processedState = { ...state };
+
+    // Process the 'on' transitions
+    if (state.on) {
+      processedState.on = processStateOn(state.on);
+    }
+
+    // Recursively process nested states
+    if (state.states) {
+      processedState.states = {};
+      for (const stateName in state.states) {
+        processedState.states[stateName] = processState(
+          state.states[stateName]
+        );
+      }
+    }
+
+    return processedState;
+  };
+
+  // Process the root machine
+  const processedConfig = { ...machineConfig };
+
+  // Process root-level 'on' transitions
+  if (machineConfig.on) {
+    processedConfig.on = processStateOn(machineConfig.on);
+  }
+
+  // Process all states
+  if (machineConfig.states) {
+    processedConfig.states = {};
+    for (const stateName in machineConfig.states) {
+      processedConfig.states[stateName] = processState(
+        machineConfig.states[stateName]
+      );
+    }
+  }
+
+  return processedConfig;
+}
+
+// Add tourId guards to all transitions
+export function addTourIdGuards<
+  TContext extends Record<string, any>,
+  TEvent extends { type: string; tourId: string }
+>(
+  machineConfig: MachineConfig<TContext, TEvent>
+): MachineConfig<TContext, TEvent> {
+  const processTransition = (transition: any): any => {
+    if (!transition) return transition;
+
+    // Guard function to check tourId
+    const tourIdGuard = ({ context, event }: any) => {
+      return event.tourId === context.tourId;
+    };
+
+    if (typeof transition === 'string') {
+      // Simple string target - convert to object with guard
+      return {
+        target: transition,
+        guard: tourIdGuard,
+      };
+    } else if (typeof transition === 'object') {
+      // Object transition - add guard
+      return {
+        ...transition,
+        guard: tourIdGuard,
+      };
+    }
+    return transition;
+  };
+
+  const processStateOn = (on: any): any => {
+    if (!on) return on;
+    const processedOn: any = {};
+
+    for (const eventType in on) {
+      const transition = on[eventType];
+      if (Array.isArray(transition)) {
+        processedOn[eventType] = transition.map(processTransition);
+      } else {
+        processedOn[eventType] = processTransition(transition);
+      }
+    }
+
     return processedOn;
   };
 

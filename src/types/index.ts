@@ -12,13 +12,13 @@ export type TourContext = {
 
 // Event types
 export type BaseTourEvent =
-  | { type: 'NEXT' }
-  | { type: 'PREV' }
-  | { type: 'PAGE_CHANGED'; page: string }
+  | { type: 'NEXT'; tourId: string }
+  | { type: 'PREV'; tourId: string }
+  | { type: 'PAGE_CHANGED'; page: string; tourId: string }
   | { type: 'START_TOUR'; tourId: string }
-  | { type: 'END_TOUR' }
-  | { type: 'SKIP_TOUR' }
-  | { type: 'AUTO_ADVANCE' };
+  | { type: 'END_TOUR'; tourId: string }
+  | { type: 'SKIP_TOUR'; tourId: string }
+  | { type: 'AUTO_ADVANCE'; tourId: string };
 
 export type TourActor = ReturnType<
   StateMachine<TourContext, BaseTourEvent>['createActor']
