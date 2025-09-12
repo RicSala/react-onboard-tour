@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState, ComponentType, useMemo } from 'react';
-import { useTourState } from './TourMachineReact';
+import { useTour } from '../hooks/useTour';
 import {
   autoUpdate,
   flip,
@@ -20,6 +20,7 @@ interface TourOverlayProps {
   backdropPointerEvents?: 'auto' | 'none';
   overlayStyles: Required<OverlayStyles>;
   cardPositioning: Required<CardPositioning>;
+  tourId: string;
 }
 
 export const TourOverlay = ({
@@ -28,9 +29,10 @@ export const TourOverlay = ({
   backdropPointerEvents = 'auto',
   overlayStyles,
   cardPositioning,
+  tourId,
 }: TourOverlayProps) => {
   const Card = customCard || DefaultCard;
-  const tour = useTourState();
+  const tour = useTour(tourId);
   const [elementRect, setElementRect] = useState<DOMRect | null>(null);
 
   const targetElement = useMemo(

@@ -1,15 +1,20 @@
 'use client';
 
-import { useTourState } from './TourMachineReact';
+import { useTour } from '../hooks/useTour';
 import { useState } from 'react';
 
-export const DebugPanel = () => {
-  const tour = useTourState();
+export const DebugPanel = ({ tourId }: { tourId: string }) => {
+  const tour = useTour(tourId);
   const [isOpen, setIsOpen] = useState(true);
 
   console.log('[DebugPanel] Tour state:', tour);
 
-  if (!tour) {
+  if (
+    !tour ||
+    !tour.isActive ||
+    tour.currentState === null ||
+    !tour.snapshot?.context
+  ) {
     return (
       <div className='fixed bottom-4 left-4 bg-gray-200 text-gray-600 px-3 py-2 rounded-lg shadow-lg text-sm z-50'>
         No active tour
@@ -41,6 +46,13 @@ export const DebugPanel = () => {
       </div>
 
       <div className='space-y-2 text-sm'>
+        <div className='bg-green-50 p-2 rounded'>
+          <span className='font-semibold'>Tour ID:</span>
+          <div className='font-mono text-green-700'>
+            {tour.snapshot?.context?.tourId}
+          </div>
+        </div>
+
         <div className='bg-green-50 p-2 rounded'>
           <span className='font-semibold'>Current State:</span>
           <div className='font-mono text-green-700'>{tour.currentState}</div>
@@ -85,26 +97,30 @@ export const DebugPanel = () => {
           <div className='bg-yellow-50 p-2 rounded border border-yellow-200'>
             <span className='font-semibold text-yellow-800'>Auto-advance:</span>
             <div className='text-yellow-700 text-xs'>
-              ⏱️ Active (Timer ID: {tour.snapshot.context.autoAdvanceTimer})
+              ⏱️ Active (Timer ID: {tour.snapshot?.context?.autoAdvanceTimer})
             </div>
           </div>
         )}
 
         {/* Show async operation status */}
-        {(tour.currentState.includes('_pending') ||
-          tour.currentState.includes('_processing') ||
-          tour.currentState.includes('_success')) && (
-          <div className='bg-purple-50 p-2 rounded border border-purple-200'>
-            <span className='font-semibold text-purple-800'>Async Status:</span>
-            <div className='text-purple-700 text-xs'>
-              {tour.currentState.includes('_pending') &&
-                '⏸️ Waiting for payment'}
-              {tour.currentState.includes('_processing') &&
-                '⏳ Processing payment...'}
-              {tour.currentState.includes('_success') && '✅ Payment complete!'}
+        {tour.currentState &&
+          (tour.currentState.includes('_pending') ||
+            tour.currentState.includes('_processing') ||
+            tour.currentState.includes('_success')) && (
+            <div className='bg-purple-50 p-2 rounded border border-purple-200'>
+              <span className='font-semibold text-purple-800'>
+                Async Status:
+              </span>
+              <div className='text-purple-700 text-xs'>
+                {tour.currentState.includes('_pending') &&
+                  '⏸️ Waiting for payment'}
+                {tour.currentState.includes('_processing') &&
+                  '⏳ Processing payment...'}
+                {tour.currentState.includes('_success') &&
+                  '✅ Payment complete!'}
+              </div>
             </div>
-          </div>
-        )}
+          )}
       </div>
     </div>
   );

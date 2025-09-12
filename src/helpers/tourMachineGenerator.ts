@@ -770,3 +770,13 @@ export function createTourHelpers<const T extends TourConfig>(config: T) {
     States: {} as States, // Type-only export for use in other files
   };
 }
+
+export const createMockHelpers = () => {
+  return {
+    getAsyncTask: () => null,
+    getTotalSteps: () => 0,
+    getStepIndex: () => 0,
+    isValidState: () => true,
+    States: {} as any,
+  };
+};

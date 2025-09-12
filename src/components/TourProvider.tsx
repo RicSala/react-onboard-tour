@@ -11,37 +11,49 @@ import React, {
 import { TourConfig } from '../types';
 
 interface TourContextType {
-  startTour: (tourId?: string) => void;
+  startTour: (tourId: string) => void;
   endTour: () => void;
-  onTourSkipped: () => void;
+  handleSkip: () => void;
+  handleComplete: () => void;
   isActive: boolean;
-  tourConfig: TourConfig;
+  tourConfig?: TourConfig;
 }
 
 const TourContext = createContext<TourContextType | undefined>(undefined);
 
 interface TourProviderProps {
   children: ReactNode;
-  tourConfig: TourConfig;
+  tours: TourConfig[];
 }
 
 export const TourProvider: React.FC<TourProviderProps> = ({
   children,
-  tourConfig,
+  tours,
 }) => {
-  const [isActive, setIsActive] = useState(false);
-
-  const startTour = useCallback(() => {
-    if (isActive) return; // Prevent starting if already active
-    setIsActive(true);
-  }, [isActive]);
+  const [activeTourId, setActiveTourId] = useState<string | null>(null);
+  const isActive = useMemo(() => activeTourId !== null, [activeTourId]);
+  const tourConfig = useMemo(
+    () => tours.find((tour) => tour.id === activeTourId),
+    [activeTourId, tours]
+  );
+  const startTour = useCallback(
+    (tourId: string) => {
+      if (isActive) return; // Prevent starting if already active
+      setActiveTourId(tourId);
+    },
+    [isActive]
+  );
 
   const endTour = useCallback(() => {
-    setIsActive(false);
+    setActiveTourId(null);
   }, []);
 
-  const onTourSkipped = useCallback(() => {
-    setIsActive(false);
+  const handleSkip = useCallback(() => {
+    setActiveTourId(null);
+  }, []);
+
+  const handleComplete = useCallback(() => {
+    setActiveTourId(null);
   }, []);
 
   const value = useMemo<TourContextType>(
@@ -50,15 +62,16 @@ export const TourProvider: React.FC<TourProviderProps> = ({
       endTour,
       isActive,
       tourConfig,
-      onTourSkipped,
+      handleSkip,
+      handleComplete,
     }),
-    [startTour, endTour, isActive, tourConfig, onTourSkipped]
+    [startTour, endTour, isActive, tourConfig, handleSkip, handleComplete]
   );
 
   return <TourContext.Provider value={value}>{children}</TourContext.Provider>;
 };
 
-export const useTour = () => {
+export const useTourContext = () => {
   const context = useContext(TourContext);
   if (context === undefined) {
     throw new Error('useOptimizedTour must be used within an TourProvider');
