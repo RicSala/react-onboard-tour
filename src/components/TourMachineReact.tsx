@@ -70,44 +70,26 @@ export const TourMachineCore: React.FC<TourMachineReactProps> = ({
 
   // Initialize actor on mount
   useEffect(() => {
-    console.log('[TourMachineReact] tourConfig:', tourConfig);
     if (!tourMachine || tourMachine.config.id !== tourConfig.id) {
       const machineConfig = generateTourMachine<TourContext, BaseTourEvent>(
         tourConfig
       );
       tourMachine = new StateMachine<TourContext, BaseTourEvent>(machineConfig);
-      console.log(
-        '[TourMachineReact] Machine generated for config:',
-        tourConfig.id
-      );
     }
-
-    console.log(
-      '[TourMachineReact] Initializing actor for tour:',
-      tourConfig.id
-    );
 
     // Create and start the actor
     tourActor = tourMachine.createActor();
-    console.log('[TourMachineReact] Actor created:', !!tourActor);
 
     // Subscribe to check for completion or skip
     const unsubscribe = tourActor.subscribe((snapshot) => {
-      console.log('[TourMachineReact] State changed:', {
-        state: snapshot.value,
-        context: snapshot.context,
-      });
-
       // Check if tour completed normally
       if (snapshot.value === 'completed') {
-        console.log('[TourMachineReact] Tour completed normally');
         handleComplete?.();
         onComplete?.();
       }
 
       // Check if tour was skipped
       if (snapshot.value === 'skipped') {
-        console.log('[TourMachineReact] Tour was skipped');
         handleSkip?.();
         onSkip?.();
       }
@@ -118,7 +100,6 @@ export const TourMachineCore: React.FC<TourMachineReactProps> = ({
 
     // Cleanup on unmount
     return () => {
-      console.log('[TourMachineReact] Cleaning up actor');
       unsubscribe();
       tourActor?.stop();
       tourActor = null;
@@ -147,18 +128,10 @@ export const TourMachineCore: React.FC<TourMachineReactProps> = ({
     if (targetPage && targetPage !== pathname) {
       // For navigating states, always navigate
       if (snapshot.value.includes('navigatingTo')) {
-        console.log(
-          '[TourMachineReact] Navigation state - going to:',
-          targetPage
-        );
         router.push(targetPage);
       }
       // For step states, navigate if needed
       else if (snapshot.value.startsWith('step')) {
-        console.log(
-          '[TourMachineReact] In step state - may need to navigate to:',
-          targetPage
-        );
         router.push(targetPage);
       }
     }
@@ -170,12 +143,6 @@ export const TourMachineCore: React.FC<TourMachineReactProps> = ({
 
     // Send PAGE_CHANGED for any active state (not idle or completed)
     if (snapshot.value !== 'idle' && snapshot.value !== 'completed') {
-      console.log(
-        '[TourMachineReact] Page changed to:',
-        pathname,
-        'in state:',
-        snapshot.value
-      );
       tourActor.send({
         type: 'PAGE_CHANGED',
         page: pathname,

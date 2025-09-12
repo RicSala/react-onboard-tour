@@ -4,7 +4,7 @@ import {
   createMockHelpers,
   createTourHelpers,
 } from '../helpers/tourMachineGenerator';
-import { TourConfig, ExtractStates } from '../types';
+import { TourConfig, ExtractStates, ExtractTourEvents } from '../types';
 import { tourActor } from '../components/TourMachineReact';
 
 export const useTour = <TConfig extends TourConfig>(tourId: string) => {
@@ -76,9 +76,11 @@ export const useTour = <TConfig extends TourConfig>(tourId: string) => {
       tourConfig
         ? tourActor?.send({ type: 'SKIP_TOUR', tourId: tourConfig.id })
         : () => {},
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    sendEvent: (event: any) =>
-      tourActor?.send({ ...event, tourId: tourConfig.id }),
+    sendEvent: (event: Omit<ExtractTourEvents<TConfig>, 'tourId'>) => {
+      console.log('sendEvent', event);
+      // @ts-expect-error - we want to send any event
+      return tourActor?.send({ ...event, tourId: tourConfig.id });
+    },
   };
 };
 

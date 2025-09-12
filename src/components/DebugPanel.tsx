@@ -7,8 +7,6 @@ export const DebugPanel = ({ tourId }: { tourId: string }) => {
   const tour = useTour(tourId);
   const [isOpen, setIsOpen] = useState(true);
 
-  console.log('[DebugPanel] Tour state:', tour);
-
   if (
     !tour ||
     !tour.isActive ||

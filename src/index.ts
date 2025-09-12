@@ -29,4 +29,8 @@ export type {
   ExtractStates,
   OverlayStyles,
   CardPositioning,
+  ExtractTourIds,
+  ExtractTourEvents,
+  ExtractCustomEvents,
+  ExtractBaseEvents,
 } from './types';

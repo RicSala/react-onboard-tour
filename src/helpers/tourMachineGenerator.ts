@@ -1,5 +1,11 @@
 import { assign, MachineConfig } from '@tinystack/machine';
-import { ExtractStates, StepContent, TourConfig, TourStep } from '../types';
+import {
+  ExtractCustomEvents,
+  ExtractStates,
+  StepContent,
+  TourConfig,
+  TourStep,
+} from '../types';
 
 // Global timer reference for auto-advance
 let globalTimerRef: any = null;
@@ -64,12 +70,6 @@ function generateBaseTourMachine<
         target: expandedStates[0]?.id || 'completed',
         actions: [
           assign((context: any, event: any) => {
-            console.log(
-              '[START_TOUR] Setting tourId from',
-              context.tourId,
-              'to',
-              event.tourId
-            );
             return {
               tourId: event.tourId,
             };
@@ -118,16 +118,12 @@ function generateBaseTourMachine<
       state.entry.push({
         type: 'startAutoAdvance',
         exec: ({ self }: any) => {
-          console.log(
-            `[Tour] Starting ${step.autoAdvance}ms auto-advance timer`
-          );
           // Clear any existing timer first
           if (globalTimerRef) {
             clearTimeout(globalTimerRef);
             globalTimerRef = null;
           }
           globalTimerRef = setTimeout(() => {
-            console.log('[Tour] Auto-advancing...');
             self.send({ type: 'AUTO_ADVANCE' });
           }, step.autoAdvance);
         },
@@ -145,7 +141,6 @@ function generateBaseTourMachine<
           type: 'clearAutoAdvance',
           exec: () => {
             if (globalTimerRef) {
-              console.log('[Tour] Clearing auto-advance timer');
               clearTimeout(globalTimerRef);
               globalTimerRef = null;
             }
@@ -216,14 +211,6 @@ function generateBaseTourMachine<
                 guards: [
                   {
                     condition: (context: any, event: any) => {
-                      console.log(
-                        '[GUARD] NEXT event (async success) - context.tourId:',
-                        context.tourId,
-                        'event.tourId:',
-                        event.tourId,
-                        'match:',
-                        event.tourId === context.tourId
-                      );
                       return event.tourId === context.tourId;
                     },
                   },
@@ -234,14 +221,6 @@ function generateBaseTourMachine<
                 guards: [
                   {
                     condition: (context: any, event: any) => {
-                      console.log(
-                        '[GUARD] NEXT event (async success) - context.tourId:',
-                        context.tourId,
-                        'event.tourId:',
-                        event.tourId,
-                        'match:',
-                        event.tourId === context.tourId
-                      );
                       return event.tourId === context.tourId;
                     },
                   },
@@ -253,14 +232,6 @@ function generateBaseTourMachine<
           guards: [
             {
               condition: (context: any, event: any) => {
-                console.log(
-                  '[GUARD] NEXT to completed - context.tourId:',
-                  context.tourId,
-                  'event.tourId:',
-                  event.tourId,
-                  'match:',
-                  event.tourId === context.tourId
-                );
                 return event.tourId === context.tourId;
               },
             },
@@ -280,14 +251,6 @@ function generateBaseTourMachine<
                 guards: [
                   {
                     condition: (context: any, event: any) => {
-                      console.log(
-                        '[GUARD] NEXT event (sync) - context.tourId:',
-                        context.tourId,
-                        'event.tourId:',
-                        event.tourId,
-                        'match:',
-                        event.tourId === context.tourId
-                      );
                       return event.tourId === context.tourId;
                     },
                   },
@@ -298,14 +261,6 @@ function generateBaseTourMachine<
                 guards: [
                   {
                     condition: (context: any, event: any) => {
-                      console.log(
-                        '[GUARD] NEXT event (sync) - context.tourId:',
-                        context.tourId,
-                        'event.tourId:',
-                        event.tourId,
-                        'match:',
-                        event.tourId === context.tourId
-                      );
                       return event.tourId === context.tourId;
                     },
                   },
@@ -317,14 +272,6 @@ function generateBaseTourMachine<
           guards: [
             {
               condition: (context: any, event: any) => {
-                console.log(
-                  '[GUARD] NEXT to completed (sync) - context.tourId:',
-                  context.tourId,
-                  'event.tourId:',
-                  event.tourId,
-                  'match:',
-                  event.tourId === context.tourId
-                );
                 return event.tourId === context.tourId;
               },
             },
@@ -460,7 +407,6 @@ function generateBaseTourMachine<
         type: 'clearAutoAdvance',
         exec: () => {
           if (globalTimerRef) {
-            console.log('[Tour] Clearing timer on completion');
             clearTimeout(globalTimerRef);
             globalTimerRef = null;
           }
@@ -483,7 +429,6 @@ function generateBaseTourMachine<
         type: 'clearAutoAdvance',
         exec: () => {
           if (globalTimerRef) {
-            console.log('[Tour] Clearing timer on skip');
             clearTimeout(globalTimerRef);
             globalTimerRef = null;
           }
@@ -739,7 +684,19 @@ export function createTourHelpers<const T extends TourConfig>(config: T) {
     getAsyncTask: (stepId: AsyncStepIds) => {
       const step = config.steps.find((s) => s.id === stepId);
       if (!step) return null;
-      return getAsyncTaskInfo(step);
+      return getAsyncTaskInfo(step) as unknown as {
+        taskId: string;
+        states: {
+          pending: string;
+          processing: string;
+          success: string;
+        };
+        events: {
+          start: ExtractCustomEvents<T>['type'];
+          success: ExtractCustomEvents<T>['type'];
+          failed: ExtractCustomEvents<T>['type'];
+        };
+      };
     },
     // Count actual UI steps (async counts as 1)
     getTotalSteps: () => config.steps.length,
