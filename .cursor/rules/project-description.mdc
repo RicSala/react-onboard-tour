@@ -1,175 +1,119 @@
----
-alwaysApply: false
----
-
-# React Onboarding Tour Library - "Touring"
+# Project Description - @tinystack/touring
 
 ## Project Overview
 
-A flexible and feature-rich onboarding tour library for React applications with support for Next.js navigation. The library provides guided tours to help users navigate through web applications with interactive highlights, tooltips, and step-by-step instructions.
+- **Purpose/Goal**: A flexible and powerful onboarding tour library for React applications that enables developers to create guided walkthroughs with support for both synchronous and asynchronous multi-step processes
+- **Tech Stack**:
+  - TypeScript
+  - React 18+ (with hooks)
+  - Next.js 14+ (optional peer dependency)
+  - @tinystack/machine (state machine library)
+  - @floating-ui/react (positioning)
+  - framer-motion (animations)
+  - Build: tsup, pnpm
+  - Linting: ESLint with TypeScript support
+  - Git hooks: Husky
+- **Project Type**: React component library / NPM package
+- **Target Audience**: React developers who need to implement onboarding tours, feature walkthroughs, or guided tutorials in their applications
 
-## Tech Stack
+## Architecture & Structure
 
-- **Framework**: React 18+ with TypeScript
-- **Build Tool**: tsup (for bundling)
-- **Package Manager**: pnpm 10.6.2
-- **Dependencies**:
-  - @floating-ui/react - For intelligent tooltip positioning
-  - motion (framer-motion) - For smooth animations
-- **Optional**: Next.js 14+ support via navigation adapter
+- **Architecture Pattern**: Component-based architecture with state machine pattern for tour flow control
+- **Design Patterns**:
+  - State Machine Pattern (using @tinystack/machine for tour state management)
+  - Context/Provider Pattern (TourProvider for global tour state)
+  - Custom Hooks Pattern (useTour, useTourState for accessing tour functionality)
+  - Factory Pattern (generateTourMachine for dynamic state machine creation)
+  - Observer Pattern (subscription to actor state changes)
+- **Data Flow**:
+  1. TourProvider wraps the application and provides tour configuration
+  2. TourMachine component initializes a state machine actor when tour starts
+  3. State machine manages tour progression through steps (sync/async)
+  4. Components subscribe to state changes via useSyncExternalStore
+  5. UI updates based on current state and context from the state machine
+- **State Management**:
+  - Global tour state via React Context (TourProvider)
+  - Tour flow state via state machine actors (@tinystack/machine)
+  - Local component state for UI interactions
+  - Sync with browser navigation (Next.js router integration)
 
-## Core Components
-
-### TourProvider
-
-- Context provider that manages tour state globally
-- Tracks current tour, step, and active status
-- Provides methods: `startTour()`, `closeTour()`, `setCurrentStep()`
-- Must wrap the application root
-
-### TouringReact
-
-- Main tour orchestrator component
-- Handles step navigation (next/prev)
-- Manages DOM element highlighting via spotlight
-- Supports validation before advancing steps
-- Keyboard controls (arrows, escape)
-- Auto-advance on DOM changes via MutationObserver
-- Route-based navigation between steps
-
-### SmoothSpotlight
-
-- Creates overlay with spotlight effect on target elements
-- Smooth animations between highlights
-- Configurable padding and border radius
-- Click-through support for overlay
-
-### DefaultCard
-
-- Default tooltip card component for tour steps
-- Shows step content, title, icon
-- Navigation buttons (prev/next/skip)
-- Progress indicator
-- Can be replaced with custom card component
-
-## Key Features
-
-### Step Configuration
-
-- **Selectors**: CSS selectors to highlight elements
-- **Content**: React nodes for step descriptions
-- **Positioning**: 12 placement options (top, bottom, left, right + corners)
-- **Navigation**: Route changes between steps (nextRoute/prevRoute)
-- **Validation**: Async validation before advancing
-- **DOM Watching**: Auto-advance when DOM changes occur (watchForChanges)
-- **Controls**: Configurable visibility of navigation buttons
-
-### Advanced Capabilities
-
-1. **Multi-route Tours**: Navigate across different pages/routes
-2. **Validation System**: Prevent advancement until conditions met
-3. **DOM Change Detection**: Watch for specific DOM mutations to auto-advance
-4. **Viewport Support**: Target elements within specific viewport containers
-5. **Keyboard Navigation**: Arrow keys and escape key support
-6. **Custom Styling**: Configurable shadow, opacity, transitions
-7. **Event Callbacks**: onStart, onComplete, onSkip, onStepChange
-
-### Navigation Adapters
-
-- Abstraction layer for routing
-- Built-in Next.js adapter (`useNextNavigationAdapter`)
-- Custom adapters possible for other routers
-
-## Type System
-
-Comprehensive TypeScript definitions for:
-
-- Step configurations
-- Tour definitions
-- Context interfaces
-- Component props
-- Navigation adapters
-- Validation results
-- DOM watching options
-
-## Development Features
-
-- Watch mode for live rebuilding
-- Global linking for local development
-- TypeScript checking
-- ESM and CJS dual output
-- Type definitions generation
-
-## Use Cases
-
-- User onboarding flows
-- Feature tutorials
-- Product tours
-- Interactive help systems
-- Form completion guides
-- Dashboard walkthroughs
-
-## Architecture Notes
-
-- Context-based state management
-- Floating UI for smart positioning
-- Framer Motion for animations
-- MutationObserver for DOM monitoring
-- Component composition pattern
-- Adapter pattern for navigation
-
-## Project Structure
+## Folder Structure
 
 ```
 react-onboard-tour/
-├── .cursor/                          # Cursor rules
-├── .learnings/                          # Development learnings and documentation
-│   ├── ...                             # Personal learning notes
-├── scripts/
-│   └── setup-dev.sh                    # Development setup automation script
-├── src/
-│   ├── adapters/
-│   │   └── nextjs.ts                   # Next.js navigation adapter hook
-│   ├── components/
-│   │   ├── DefaultCard.tsx             # Default tour step card UI component
-│   │   ├── SmothSpotlight.tsx          # Spotlight overlay component
-│   │   ├── TouringReact.tsx            # Main tour orchestrator component
-│   │   └── TourProvider.tsx            # Context provider for tour state
-│   ├── hooks/
-│   │   ├── index.ts                    # Hook exports
-│   │   └── useWatchForChanges.ts       # DOM mutation observer hook
-│   ├── types/
-│   │   └── index.ts                    # TypeScript type definitions
-│   └── index.ts                        # Main library entry point and exports
-├── ...
-
-Build output (generated):
-├── dist/
-│   ├── index.js                       # CommonJS build
-│   ├── index.mjs                      # ES Module build
-│   ├── index.d.ts                     # Type definitions
-│   └── index.css                      # Styles (if any)
+├── .claude/                    # Claude AI configuration
+├── .cursor/                    # Cursor IDE configuration
+│   └── rules/                  # Project rules and descriptions
+├── .husky/                     # Git hooks configuration
+│   └── _/                      # Husky internal files
+├── .learnings/                 # Project learnings and notes
+├── dist/                       # Build output (distributed files)
+├── scripts/                    # Development scripts
+│   └── setup-dev.sh            # Development environment setup
+├── src/                        # Source code
+│   ├── components/             # React components
+│   │   ├── DebugPanel.tsx      # Debug panel for development
+│   │   ├── DefaultCard.tsx     # Default tour card UI component
+│   │   ├── TourConfigViewer.tsx # Tour configuration viewer
+│   │   ├── TourMachineReact.tsx # Main tour state machine component
+│   │   ├── TourOverlay.tsx     # Overlay component for highlighting
+│   │   └── TourProvider.tsx    # Context provider for tour state
+│   ├── helpers/                # Utility functions
+│   │   ├── scrollIfNeeded.ts   # Scroll utility for element visibility
+│   │   ├── tourMachineGenerator.ts # State machine factory
+│   │   ├── useIsObjectRefChanging.ts # Debug hook for ref changes
+│   │   └── useLifeCycleLog.ts  # Debug hook for lifecycle logging
+│   ├── types/                  # TypeScript type definitions
+│   │   └── index.ts            # All type exports
+│   ├── const.ts                # Constants and defaults
+│   └── index.ts                # Main entry point and exports
+├── .eslintrc.json              # ESLint configuration
+├── .gitignore                  # Git ignore rules
+├── package.json                # Package configuration
+├── pnpm-lock.yaml              # Lock file for dependencies
+├── README.md                   # Project documentation
+└── tsconfig.json               # TypeScript configuration
 ```
 
-## File Responsibilities
+## Core Components
 
-### Core Components (`src/components/`)
+### Main Components
 
-- **TourProvider.tsx**: Global state management, tour lifecycle
-- **TouringReact.tsx**: Step logic, navigation, validation, DOM monitoring
-- **SmothSpotlight.tsx**: Visual highlighting and overlay effects
-- **DefaultCard.tsx**: Step content display and controls
+- **TourProvider**: Context provider that manages global tour state, provides startTour, endTour, and tour configuration to child components
+- **TourMachine**: Core component that creates and manages the state machine actor, handles navigation, keyboard controls, and renders the tour overlay
+- **TourOverlay**: Renders the highlight overlay around target elements and positions the tour card using Floating UI
+- **DefaultCard**: Default UI component for tour steps, displays title, content, navigation buttons, and progress indicators
+- **TourConfigViewer**: Development tool that displays the current tour configuration in a formatted view
+- **DebugPanel**: Development panel showing current state, context, and machine visualization for debugging
 
-### Utilities (`src/hooks/`)
+### Custom Hooks
 
-- **useWatchForChanges.ts**: MutationObserver wrapper for auto-advancement
+- **useTour**: Access tour context including startTour, endTour, isActive state, and tour configuration
+- **useTourState**: Get current tour state, step data, navigation capabilities, and control functions (nextStep, prevStep, skipTour)
+- **useIsObjectRefChanging**: Development hook to detect when object references change between renders
+- **useLifecycleLog**: Development hook to log component lifecycle events for debugging
 
-### Integration (`src/adapters/`)
+### Types/Interfaces
 
-- **nextjs.ts**: Next.js App Router integration
+- **TourConfig**: Main configuration object defining tour ID, steps array, and navigation settings
+- **TourStep**: Individual step configuration supporting both sync and async types with content, targeting, and navigation options
+- **TourContext**: State machine context containing current tourId, page, targetElement, title, and content
+- **BaseTourEvent**: Union type of all possible tour events (NEXT, PREV, PAGE_CHANGED, START_TOUR, END_TOUR, SKIP_TOUR, AUTO_ADVANCE)
+- **CardProps**: Props interface for custom card components with step info and control functions
+- **StepContent**: Content structure for async steps with targetElement, title, and content fields
+- **ExtractStates**: Type helper to extract all possible state values from a tour configuration
+- **OverlayStyles**: Customization options for overlay appearance (radius, padding, opacity, color)
+- **CardPositioning**: Configuration for card placement relative to target elements
 
-### Configuration Files
+### Key Constants
 
-- **tsconfig.json**: TypeScript compiler options
-- **package.json**: Dependencies, scripts, package metadata
-- **.cursor/rules/**: AI assistant context and behavior
+- **STYLE_DEFAULT**: Default overlay styling with radius: 10, padding: 10, opacity: 0.2, colorRgb: '0, 0, 0'
+- **CARD_POSITIONING_DEFAULT**: Default card positioning with floating: true, side: 'top', distancePx: 0
+
+### Helper Functions
+
+- **generateTourMachine**: Factory function that creates a state machine configuration from TourConfig
+- **createTourHelpers**: Creates utility functions for getting step index and total steps
+- **getAsyncTaskInfo/getAsyncTaskInfoById**: Retrieve async step information and sub-states
+- **addEventTrackingToMachine**: Enhances state machine with event tracking capabilities
+- **scrollIfNeeded**: Utility to scroll elements into view when needed during tour navigation
