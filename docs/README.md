@@ -1,19 +1,19 @@
 # @tinystack/touring Documentation
 
-Welcome to the official documentation for **@tinystack/touring** - a flexible, state-machine-driven onboarding tour library for React applications.
+Welcome to the documentation for **@tinystack/touring** - a state-machine-driven onboarding tour library for React applications with Next.js support.
 
 ## What is @tinystack/touring?
 
-@tinystack/touring is a powerful React library that helps you create interactive product tours and onboarding experiences. Built on a robust state machine architecture, it provides a declarative and type-safe way to guide users through your application's features.
+@tinystack/touring is a React library that creates interactive product tours and onboarding flows. It uses a state machine architecture (built on @tinystack/machine) to manage tour progression, handle multi-page navigation, and support both synchronous and asynchronous tour steps.
 
-### Why Choose @tinystack/touring?
+### Key Characteristics
 
-- **🎯 Predictable State Management**: Built on finite state machines for reliable, debuggable tour flows
-- **⚡ Performance First**: Minimal bundle size with zero unnecessary dependencies
-- **🔧 Developer Friendly**: Full TypeScript support with excellent IDE integration
-- **🎨 Highly Customizable**: Every aspect can be styled and customized to match your brand
-- **📱 Framework Agnostic**: Works seamlessly with Next.js, Remix, Vite, and more
-- **♿ Accessible**: Built with accessibility in mind from the ground up
+- **🎯 State Machine Based**: Uses finite state machines for predictable tour flow management
+- **🚀 Next.js Optimized**: Built specifically for Next.js App Router with client-side navigation support
+- **📝 TypeScript First**: Full TypeScript support with type inference for tour configurations
+- **🎨 Customizable UI**: Replace default components with custom React components
+- **📍 Element Targeting**: Highlight specific DOM elements with overlay spotlight effects
+- **🔄 Async Step Support**: Handle loading states and asynchronous operations during tours
 
 ## Quick Example
 
@@ -30,6 +30,8 @@ function App() {
         targetElement: '#hero-section',
         title: 'Welcome to Our App!',
         content: 'Let us show you around the key features.',
+        canSkip: true,
+        canPrev: true,
       },
       {
         id: 'dashboard',
@@ -39,6 +41,8 @@ function App() {
         content: 'Track your progress and analytics here.',
       },
     ],
+    allowPageNavigation: true, // enable multi-page tours
+    allowSkip: true, // allow users to skip the tour
   };
 
   return (
@@ -50,30 +54,29 @@ function App() {
 }
 ```
 
-## Key Features
+## Features
 
-### 🚀 Advanced Tour Capabilities
+### Core Functionality
 
-- **Multi-Page Tours**: Guide users across different routes and pages
-- **Async Steps**: Handle loading states and async operations within tours
-- **Auto-Advance**: Configure steps to progress automatically
-- **Smart Positioning**: Intelligent card placement with collision detection
-- **Spotlight Effect**: Beautiful overlay highlighting with customizable styles
+- **Multi-Page Tours**: Navigate users across different pages using Next.js routing
+- **Async Steps**: Support for steps with pending, processing, and success states
+- **Auto-Advance**: Steps can automatically progress after a specified duration
+- **Element Highlighting**: Overlay with spotlight effect to focus on specific DOM elements
+- **Navigation Control**: Configure which steps allow forward/backward navigation
 
-### 🛠 Developer Experience
+### Customization
 
-- **TypeScript First**: Complete type safety with advanced type inference
-- **Debug Panel**: Built-in debugging tools for development
-- **Event System**: Comprehensive event hooks for analytics and custom logic
-- **State Persistence**: Save and restore tour progress
-- **Testing Utilities**: Helpers for testing tour flows
+- **Custom Card Components**: Provide your own React component for tour cards
+- **Overlay Styling**: Configure overlay opacity, color, padding, and border radius
+- **Card Positioning**: Control card placement relative to target elements (top, bottom, left, right)
+- **Event Handlers**: Hook into tour lifecycle events (onComplete, onSkip, onNext, onPrev)
 
-### 🎨 Customization Options
+### Developer Tools
 
-- **Custom Components**: Replace any default component with your own
-- **Theming System**: Complete control over colors, spacing, and animations
-- **Overlay Styles**: Customize spotlight effects and overlays
-- **Card Templates**: Create reusable card designs for different tour types
+- **TypeScript Support**: Full type safety with inferred types from tour configuration
+- **Debug Panel**: Built-in component for debugging tour state during development
+- **Tour Helpers**: Utility functions for generating and managing tour machines
+- **Global Actor Access**: Direct access to the state machine actor for advanced control
 
 ## Core Concepts
 
@@ -85,10 +88,7 @@ Every tour in @tinystack/touring is powered by a finite state machine, ensuring 
 // Tours are composed of states and transitions
 const tourMachine = generateTourMachine({
   id: 'product-tour',
-  steps: [
-    { id: 'step1', /* ... */ },
-    { id: 'step2', /* ... */ },
-  ],
+  steps: [{ id: 'step1' /* ... */ }, { id: 'step2' /* ... */ }],
 });
 ```
 
@@ -98,10 +98,10 @@ Tours are defined using a simple, declarative configuration:
 
 ```typescript
 interface TourConfig {
-  id: string;                      // Unique tour identifier
-  steps: TourStep[];                // Array of tour steps
-  allowPageNavigation?: boolean;    // Enable multi-page tours
-  allowSkip?: boolean;              // Allow users to skip the tour
+  id: string; // Unique tour identifier
+  steps: TourStep[]; // Array of tour steps
+  allowPageNavigation?: boolean; // Enable multi-page tours
+  allowSkip?: boolean; // Allow users to skip the tour
 }
 ```
 
@@ -135,46 +135,45 @@ interface TourConfig {
 
 ## Getting Started
 
-Ready to add tours to your application?
+### Installation
 
-<div style="display: flex; gap: 20px; margin-top: 30px;">
-  <a href="getting-started/installation.md" style="flex: 1; padding: 20px; background: #007acc; color: white; text-decoration: none; border-radius: 8px; text-align: center;">
-    <strong>Installation →</strong>
-    <div style="margin-top: 8px; opacity: 0.9;">Get started in 2 minutes</div>
-  </a>
-  
-  <a href="getting-started/quick-start.md" style="flex: 1; padding: 20px; background: #28a745; color: white; text-decoration: none; border-radius: 8px; text-align: center;">
-    <strong>Quick Start →</strong>
-    <div style="margin-top: 8px; opacity: 0.9;">Build your first tour</div>
-  </a>
-  
-  <a href="examples/basic-tour.md" style="flex: 1; padding: 20px; background: #6f42c1; color: white; text-decoration: none; border-radius: 8px; text-align: center;">
-    <strong>Examples →</strong>
-    <div style="margin-top: 8px; opacity: 0.9;">See it in action</div>
-  </a>
-</div>
+```bash
+npm install @tinystack/touring
+# or
+pnpm add @tinystack/touring
+# or
+yarn add @tinystack/touring
+```
 
-## Browser Support
+### Requirements
 
-@tinystack/touring supports all modern browsers:
+- React 18.0.0 or higher
+- React DOM 18.0.0 or higher
+- Next.js 14.0.0 or higher (for multi-page tours)
 
-- Chrome/Edge 90+
-- Firefox 88+
-- Safari 14+
-- Opera 76+
+### Quick Start Guide
 
-## Community & Support
+1. **Wrap your app with TourProvider**
+2. **Add the TourMachine component**
+3. **Define your tour configuration**
+4. **Start the tour programmatically**
 
-- **GitHub**: [Report issues and contribute](https://github.com/tinystack/touring)
-- **Discord**: [Join our community](https://discord.gg/tinystack)
-- **Twitter**: [@tinystack](https://twitter.com/tinystack)
+See the [Quick Start](getting-started/quick-start.md) guide for detailed setup instructions.
+
+## Dependencies
+
+The library has minimal dependencies:
+
+- `@floating-ui/react` - For intelligent card positioning
+- `@tinystack/machine` - State machine implementation
+- `motion` - For smooth animations
+
+## Current Limitations
+
+- Currently optimized for Next.js App Router (other frameworks coming soon)
+- No built-in accessibility features yet (planned for future releases)
+- No state persistence across page reloads (in development)
 
 ## License
 
 @tinystack/touring is [MIT licensed](https://opensource.org/licenses/MIT).
-
----
-
-<div style="text-align: center; margin-top: 50px; opacity: 0.7;">
-  Built with ❤️ by the TinyStack team
-</div>

@@ -206,6 +206,7 @@ export const TourOverlay = ({
         currentStepIndex={tour.currentStepIndex}
         totalSteps={tour.totalSteps}
         canGoNext={tour.canGoNext!}
+        canSkip={tour.canSkip!}
         canGoPrev={tour.canGoPrev!}
         nextStep={tour.nextStep}
         prevStep={tour.prevStep}

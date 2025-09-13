@@ -33,6 +33,7 @@ export interface CardProps {
   totalSteps: number;
   canGoNext: boolean;
   canGoPrev: boolean;
+  canSkip: boolean;
   nextStep: () => void;
   prevStep: () => void;
   skipTour: () => void;
@@ -40,7 +41,6 @@ export interface CardProps {
   className?: string;
   style?: React.CSSProperties;
   showControls?: boolean;
-  showSkip?: boolean;
 }
 
 // Step content for each async state
@@ -139,9 +139,15 @@ export type CardPositioning = {
 export type ExtractTourIds<T extends readonly TourConfig[]> = T[number]['id'];
 
 // Type helper to extract custom events from async tour steps
-export type ExtractCustomEvents<T extends TourConfig> = ExtractStepEvents<T['steps'][number], T['id']>;
+export type ExtractCustomEvents<T extends TourConfig> = ExtractStepEvents<
+  T['steps'][number],
+  T['id']
+>;
 
-type ExtractStepEvents<Step extends TourStep, TourId extends string> = Step extends {
+type ExtractStepEvents<
+  Step extends TourStep,
+  TourId extends string
+> = Step extends {
   type: 'async';
   id: infer StepId extends string;
   events?: infer Events;
@@ -151,19 +157,24 @@ type ExtractStepEvents<Step extends TourStep, TourId extends string> = Step exte
       success?: infer Success;
       failed?: infer Failed;
     }
-    ? 
-      // Use the custom event name if provided, otherwise use default pattern
-      | (Start extends string ? { type: Start; tourId: TourId } : { type: `START_${Uppercase<StepId>}`; tourId: TourId })
-      | (Success extends string ? { type: Success; tourId: TourId } : { type: `${Uppercase<StepId>}_SUCCESS`; tourId: TourId })
-      | (Failed extends string ? { type: Failed; tourId: TourId } : { type: `${Uppercase<StepId>}_FAILED`; tourId: TourId })
+    ? // Use the custom event name if provided, otherwise use default pattern
+      | (Start extends string
+            ? { type: Start; tourId: TourId }
+            : { type: `START_${Uppercase<StepId>}`; tourId: TourId })
+        | (Success extends string
+            ? { type: Success; tourId: TourId }
+            : { type: `${Uppercase<StepId>}_SUCCESS`; tourId: TourId })
+        | (Failed extends string
+            ? { type: Failed; tourId: TourId }
+            : { type: `${Uppercase<StepId>}_FAILED`; tourId: TourId })
     : // No events object at all - generate all defaults
       | { type: `START_${Uppercase<Step['id']>}`; tourId: TourId }
-      | { type: `${Uppercase<Step['id']>}_SUCCESS`; tourId: TourId }
-      | { type: `${Uppercase<Step['id']>}_FAILED`; tourId: TourId }
+        | { type: `${Uppercase<Step['id']>}_SUCCESS`; tourId: TourId }
+        | { type: `${Uppercase<Step['id']>}_FAILED`; tourId: TourId }
   : never;
 
 // Base events with specific tour ID
-export type ExtractBaseEvents<T extends TourConfig> = 
+export type ExtractBaseEvents<T extends TourConfig> =
   | { type: 'NEXT'; tourId: T['id'] }
   | { type: 'PREV'; tourId: T['id'] }
   | { type: 'PAGE_CHANGED'; page: string; tourId: T['id'] }
@@ -173,4 +184,6 @@ export type ExtractBaseEvents<T extends TourConfig> =
   | { type: 'AUTO_ADVANCE'; tourId: T['id'] };
 
 // Combined event type for a specific tour config
-export type ExtractTourEvents<T extends TourConfig> = ExtractBaseEvents<T> | ExtractCustomEvents<T>;
+export type ExtractTourEvents<T extends TourConfig> =
+  | ExtractBaseEvents<T>
+  | ExtractCustomEvents<T>;

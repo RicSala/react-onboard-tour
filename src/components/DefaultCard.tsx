@@ -10,6 +10,7 @@ const DefaultCard = forwardRef<HTMLDivElement, CardProps>(
       totalSteps,
       canGoNext,
       canGoPrev,
+      canSkip,
       nextStep,
       prevStep,
       skipTour,
@@ -17,7 +18,6 @@ const DefaultCard = forwardRef<HTMLDivElement, CardProps>(
       className,
       style,
       showControls = true,
-      showSkip = true,
     },
     ref
   ) => {
@@ -133,7 +133,7 @@ const DefaultCard = forwardRef<HTMLDivElement, CardProps>(
             </button>
           )}
         </div>
-        {showSkip && !isLastStep && (
+        {!isLastStep && canSkip && (
           <button
             onClick={skipTour}
             style={{

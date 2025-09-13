@@ -2,29 +2,29 @@
 
 ## Project Overview
 
-@tinystack/touring is a flexible, state-machine-driven onboarding tour library for React applications. Built on top of the @tinystack/machine state management library, it provides a declarative API for creating interactive product tours with support for both synchronous and asynchronous steps.
+@tinystack/touring is a state-machine-driven onboarding tour library for React applications, specifically designed for Next.js. Built on top of the @tinystack/machine state management library, it provides a declarative API for creating interactive product tours with support for both synchronous and asynchronous steps.
 
 ## Key Features
 
 ### 🎯 Core Capabilities
-- **State Machine Architecture**: Built on XState-inspired state machines for predictable, debuggable tour flows
-- **Async Step Support**: Native support for asynchronous operations during tours (API calls, animations, etc.)
-- **Multi-Page Tours**: Seamlessly navigate users across different pages/routes during a tour
-- **Smart Element Targeting**: Highlight specific DOM elements with customizable overlays
+- **State Machine Architecture**: Uses finite state machines for predictable, debuggable tour flows
+- **Async Step Support**: Handles asynchronous operations with pending, processing, and success states
+- **Multi-Page Tours**: Navigate users across different routes using Next.js App Router
+- **Element Targeting**: Highlight specific DOM elements with overlay spotlight effects
 - **Auto-Advance Steps**: Configure steps to automatically progress after a specified duration
-- **Flexible Navigation**: Full control over forward/backward navigation with configurable permissions
+- **Navigation Control**: Configure forward/backward navigation permissions per step
 
 ### 🎨 Customization
 - **Custom Card Components**: Replace default tour cards with your own React components
 - **Overlay Styling**: Customize overlay appearance (opacity, color, padding, border radius)
-- **Card Positioning**: Control floating behavior and positioning relative to target elements
-- **Event Tracking**: Built-in event system for analytics and custom behaviors
+- **Card Positioning**: Control card placement relative to target elements (top, bottom, left, right)
+- **Event Handlers**: Hook into tour lifecycle events for custom behaviors
 
 ### 🔧 Developer Experience
-- **TypeScript First**: Full TypeScript support with advanced type inference
-- **Framework Integration**: Optimized for Next.js with App Router support
-- **Debug Panel**: Built-in debugging tools for development
-- **Zero Dependencies**: Minimal bundle size with only essential dependencies
+- **TypeScript Support**: Full TypeScript support with type inference for tour configurations
+- **Next.js Integration**: Built for Next.js App Router with client-side navigation
+- **Debug Panel**: Built-in debugging component for development
+- **Minimal Dependencies**: Only three runtime dependencies (@floating-ui/react, @tinystack/machine, motion)
 
 ## Technical Architecture
 
@@ -49,27 +49,33 @@ Tours communicate through a typed event system:
 
 ## Use Cases
 
-1. **User Onboarding**: Guide new users through key features
+1. **User Onboarding**: Guide new users through application features
 2. **Feature Announcements**: Highlight new functionality after updates
-3. **Interactive Tutorials**: Step-by-step walkthroughs of complex workflows
-4. **Progressive Disclosure**: Reveal advanced features as users progress
-5. **Context-Sensitive Help**: Provide guided assistance based on user actions
+3. **Interactive Tutorials**: Step-by-step walkthroughs of workflows
+4. **Form Assistance**: Guide users through complex multi-step forms
+5. **Dashboard Tours**: Explain different sections and metrics
 
-## Integration
+## Technical Requirements
 
-The library integrates seamlessly with:
-- **Next.js 14+**: Full App Router and Server Component support
-- **React 18+**: Leverages concurrent features and Suspense
-- **TypeScript 5+**: Advanced type inference and safety
-- **Motion**: Smooth animations via Framer Motion
-- **Floating UI**: Smart positioning for tour cards
+- **React**: 18.0.0 or higher (peer dependency)
+- **React DOM**: 18.0.0 or higher (peer dependency)
+- **Next.js**: 14.0.0 or higher (optional peer dependency, required for multi-page tours)
+- **TypeScript**: 5.0.0 or higher (for development)
+
+## Current Limitations
+
+- **Framework Support**: Currently optimized for Next.js App Router only
+- **Accessibility**: No built-in accessibility features (screen reader support, keyboard navigation)
+- **State Persistence**: Tour progress is not saved across page reloads
+- **Mobile Support**: Limited testing on mobile devices
+- **Animation Control**: Limited control over animation timing and easing
 
 ## Development Status
 
-Currently at version 0.1.10, the library is in active development with a focus on:
-- Stability and performance optimizations
-- Enhanced accessibility features
-- Extended customization options
-- Improved developer tooling
+Version 0.1.10 - The library is in early development. Current focus areas:
+- Core stability and bug fixes
+- API refinement based on usage patterns
+- Documentation and examples
+- Testing coverage
 
-The project follows semantic versioning and maintains backward compatibility within major versions.
+The project uses semantic versioning but API changes may occur in minor versions during the 0.x phase.

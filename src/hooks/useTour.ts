@@ -59,6 +59,9 @@ export const useTour = <TConfig extends TourConfig>(tourId: string) => {
     canGoPrev: tourConfig
       ? tourActor.can({ type: 'PREV', tourId: tourConfig.id })
       : false,
+    canSkip: tourConfig
+      ? tourActor.can({ type: 'SKIP_TOUR', tourId: tourConfig.id })
+      : false,
     snapshot,
     nextStep: () =>
       tourConfig
@@ -93,6 +96,7 @@ export const inactiveReturn = () => {
     totalSteps: 0,
     canGoNext: false,
     canGoPrev: false,
+    canSkip: false,
     snapshot: null,
     nextStep: () => () => {},
     prevStep: () => () => {},
