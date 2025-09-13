@@ -1,6 +1,6 @@
 #!/bin/bash
 
-echo "🚀 Setting up Touring for development..."
+echo "🚀 Setting up tourista for development..."
 
 # Install dependencies
 echo "📦 Installing dependencies..."
@@ -17,7 +17,7 @@ pnpm link --global
 echo ""
 echo "✅ Setup complete! Starting watch mode..."
 echo ""
-echo "👉 In your app: pnpm link touring --global"
+echo "👉 In your app: pnpm link tourista --global"
 echo ""
 
 # Start watch mode

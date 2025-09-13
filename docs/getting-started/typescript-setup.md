@@ -1,6 +1,6 @@
 # TypeScript Setup
 
-@tinystack/touring is built with TypeScript and provides comprehensive type definitions. This guide shows how to leverage TypeScript for better developer experience and type safety.
+Tourista is built with TypeScript and provides comprehensive type definitions. This guide shows how to leverage TypeScript for better developer experience and type safety.
 
 ## Basic Type Usage
 
@@ -15,13 +15,13 @@ import {
   BaseTourEvent,
   OverlayStyles,
   CardPositioning,
-} from '@tinystack/touring';
+} from 'Tourista';
 ```
 
 ### Typing Tour Configurations
 
 ```tsx
-import { TourConfig } from '@tinystack/touring';
+import { TourConfig } from 'Tourista';
 
 // Method 1: Basic typing (less type inference)
 const basicTour: TourConfig = {
@@ -65,7 +65,7 @@ const advancedTour = {
 ### Typing Tour Steps
 
 ```tsx
-import { TourStep } from '@tinystack/touring';
+import { TourStep } from 'Tourista';
 
 // Synchronous step
 const syncStep: TourStep = {
@@ -114,15 +114,15 @@ Here's how to set up a fully type-safe tour with helpers and exports:
 
 ```tsx
 // tours/product-tour.ts
-import { 
-  TourConfig, 
-  TourContext, 
+import {
+  TourConfig,
+  TourContext,
   BaseTourEvent,
   ExtractStates,
   createTourHelpers,
   generateTourMachine,
-  useTour
-} from '@tinystack/touring';
+  useTour,
+} from 'Tourista';
 
 // Define your tour configuration with 'as const satisfies'
 // This gives you both literal types AND type checking
@@ -144,7 +144,8 @@ export const tourConfig = {
       content: {
         pending: {
           title: 'Rate Your Experience',
-          content: 'Please rate your experience and click "Submit Review" to share your feedback.',
+          content:
+            'Please rate your experience and click "Submit Review" to share your feedback.',
           targetElement: '#star-rating',
         },
         processing: {
@@ -154,7 +155,8 @@ export const tourConfig = {
         },
         success: {
           title: '✅ Review Submitted!',
-          content: 'Thank you for your feedback! Click Next to complete the tour.',
+          content:
+            'Thank you for your feedback! Click Next to complete the tour.',
           targetElement: '#review-success',
         },
       },
@@ -165,7 +167,8 @@ export const tourConfig = {
       page: '/demo/complete',
       targetElement: '#order-complete',
       title: '🎊 Thank You for Your Purchase!',
-      content: 'Your order is complete and will be delivered soon. Thank you for shopping with us!',
+      content:
+        'Your order is complete and will be delivered soon. Thank you for shopping with us!',
       autoAdvance: 5000,
     },
   ],
@@ -174,7 +177,8 @@ export const tourConfig = {
 } as const satisfies TourConfig;
 
 // Export tour helpers for use throughout your app
-export const productTourHelpers = createTourHelpers<typeof tourConfig>(tourConfig);
+export const productTourHelpers =
+  createTourHelpers<typeof tourConfig>(tourConfig);
 
 // Export a typed version of useTour for this specific tour
 export const useProductTour = () => useTour<typeof tourConfig>('product-tour');
@@ -183,7 +187,10 @@ export const useProductTour = () => useTour<typeof tourConfig>('product-tour');
 export type ProductTourStates = ExtractStates<typeof tourConfig>;
 
 // Generate and export the machine configuration if needed
-export const productTourMachine = generateTourMachine<TourContext, BaseTourEvent>(tourConfig);
+export const productTourMachine = generateTourMachine<
+  TourContext,
+  BaseTourEvent
+>(tourConfig);
 ```
 
 ### Using the Typed Tour
@@ -194,9 +201,9 @@ import { useProductTour, ProductTourStates } from '../tours/product-tour';
 
 export function ProductPage() {
   const tour = useProductTour();
-  
+
   if (!tour) return null;
-  
+
   // TypeScript knows all possible states
   const handleStateChange = (state: ProductTourStates) => {
     switch (state) {
@@ -214,10 +221,12 @@ export function ProductPage() {
         break;
     }
   };
-  
+
   return (
     <div>
-      <p>Current step: {tour.currentStepIndex + 1} of {tour.totalSteps}</p>
+      <p>
+        Current step: {tour.currentStepIndex + 1} of {tour.totalSteps}
+      </p>
       <button onClick={tour.nextStep}>Next</button>
     </div>
   );
@@ -229,7 +238,7 @@ export function ProductPage() {
 ### Custom Card Component Types
 
 ```tsx
-import { CardProps } from '@tinystack/touring';
+import { CardProps } from 'Tourista';
 import { FC } from 'react';
 
 // Properly typed custom card component
@@ -271,7 +280,7 @@ const CustomCard: FC<CardProps> = ({
 ### Typing Configuration Options
 
 ```tsx
-import { OverlayStyles, CardPositioning } from '@tinystack/touring';
+import { OverlayStyles, CardPositioning } from 'Tourista';
 
 const overlayStyles: OverlayStyles = {
   radius: 10,
@@ -290,7 +299,7 @@ const cardPositioning: CardPositioning = {
 ### Type-Safe Event Handling
 
 ```tsx
-import { TourConfig, ExtractTourEvents } from '@tinystack/touring';
+import { TourConfig, ExtractTourEvents } from 'Tourista';
 
 const tourConfig = {
   id: 'my-tour',
@@ -317,7 +326,7 @@ type MyTourEvents = ExtractTourEvents<typeof tourConfig>;
 ### Extracting State Types
 
 ```tsx
-import { ExtractStates } from '@tinystack/touring';
+import { ExtractStates } from 'Tourista';
 
 const tourConfig = {
   id: 'example',
@@ -346,7 +355,7 @@ type TourStates = ExtractStates<typeof tourConfig>;
 ### Extracting Tour IDs
 
 ```tsx
-import { ExtractTourIds } from '@tinystack/touring';
+import { ExtractTourIds } from 'Tourista';
 
 const tours = [
   { id: 'onboarding', steps: [] },

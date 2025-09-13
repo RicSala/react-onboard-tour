@@ -1,10 +1,10 @@
 # Architecture
 
-This document describes the architecture and design patterns used in @tinystack/touring.
+This document describes the architecture and design patterns used in Tourista.
 
 ## Overview
 
-@tinystack/touring is built on a state machine architecture, providing predictable and debuggable tour flows. The library separates concerns into distinct layers:
+Tourista is built on a state machine architecture, providing predictable and debuggable tour flows. The library separates concerns into distinct layers:
 
 1. **State Management** - Finite state machines handle tour logic. Ensures the tour flow is predictable and debuggable.
 2. **React Integration** - Components and hooks provide the UI layer. Handles the tour lifecycle and provides the tour context to the components.
@@ -285,8 +285,8 @@ const { refs, floatingStyles } = useFloating({
   placement: cardPositioning.side, // 'top' | 'bottom' | 'left' | 'right'
   middleware: [
     offset(cardPositioning.distancePx), // Distance from target
-    flip(),                              // Auto-flip when no space
-    shift({ padding: 5 }),               // Keep within viewport
+    flip(), // Auto-flip when no space
+    shift({ padding: 5 }), // Keep within viewport
   ],
 });
 ```
@@ -303,11 +303,11 @@ const { refs, floatingStyles } = useFloating({
 Users can still override automatic positioning:
 
 ```tsx
-<TourMachine 
+<TourMachine
   cardPositioning={{
-    floating: true,      // Enable floating behavior
-    side: 'bottom',      // Preferred side
-    distancePx: 10,      // Distance from element
+    floating: true, // Enable floating behavior
+    side: 'bottom', // Preferred side
+    distancePx: 10, // Distance from element
   }}
 />
 ```

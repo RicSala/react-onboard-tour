@@ -7,7 +7,7 @@ You are not expected to use this component directly, and this docs are here just
 ## Usage
 
 ```tsx
-import { TourOverlay } from '@tinystack/touring';
+import { TourOverlay } from 'Tourista';
 
 // Usually used internally by TourMachine
 <TourOverlay
@@ -199,7 +199,7 @@ Automatically updates positioning when:
 ```tsx
 'use client';
 
-import { TourOverlay } from '@tinystack/touring';
+import { TourOverlay } from 'Tourista';
 import { MyCustomCard } from './MyCustomCard';
 
 export function CustomTourOverlay() {

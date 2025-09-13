@@ -21,7 +21,7 @@ app/
 
 ```tsx
 // app/components/tour-config.ts
-import { TourConfig } from '@tinystack/touring';
+import { TourConfig } from 'Tourista';
 
 export const appTours: TourConfig[] = [
   {
@@ -89,7 +89,7 @@ export const appTours: TourConfig[] = [
 // app/layout.tsx
 'use client';
 
-import { TourProvider } from '@tinystack/touring';
+import { TourProvider } from 'Tourista';
 import { appTours } from './components/tour-config';
 
 export default function RootLayout({
@@ -113,9 +113,9 @@ export default function RootLayout({
 // app/components/TourSetup.tsx
 'use client';
 
-import { TourMachine } from '@tinystack/touring';
+import { TourMachine } from 'Tourista';
 import { useEffect } from 'react';
-import { useTourContext } from '@tinystack/touring';
+import { useTourContext } from 'Tourista';
 
 export function TourSetup() {
   const { startTour } = useTourContext();
@@ -169,7 +169,7 @@ export function TourSetup() {
 // app/page.tsx
 'use client';
 
-import { useTourContext } from '@tinystack/touring';
+import { useTourContext } from 'Tourista';
 import { TourSetup } from './components/TourSetup';
 
 export default function HomePage() {
@@ -209,7 +209,7 @@ export default function HomePage() {
 // app/dashboard/page.tsx
 'use client';
 
-import { useTourContext } from '@tinystack/touring';
+import { useTourContext } from 'Tourista';
 import { TourSetup } from '../components/TourSetup';
 
 export default function DashboardPage() {
@@ -297,7 +297,7 @@ if (tourControls) {
 // app/components/CustomTourCard.tsx
 'use client';
 
-import { CardProps } from '@tinystack/touring';
+import { CardProps } from 'Tourista';
 
 export function CustomTourCard({
   title,

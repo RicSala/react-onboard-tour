@@ -1,10 +1,10 @@
 # Installation
 
-This guide will help you install @tinystack/touring in your React application.
+This guide will help you install Tourista in your React application.
 
 ## Prerequisites
 
-Before installing @tinystack/touring, ensure you have:
+Before installing Tourista, ensure you have:
 
 - **React** version 18.0.0 or higher
 - **React DOM** version 18.0.0 or higher
@@ -16,13 +16,13 @@ Install the package using your preferred package manager:
 
 ```bash
 # Using npm
-npm install @tinystack/touring
+npm install Tourista
 
 # Using pnpm (recommended)
-pnpm add @tinystack/touring
+pnpm add Tourista
 
 # Using yarn
-yarn add @tinystack/touring
+yarn add Tourista
 ```
 
 ## Peer Dependencies
@@ -42,7 +42,7 @@ All three dependencies are required for the library to function properly.
 
 ## Runtime Dependencies
 
-@tinystack/touring includes these runtime dependencies:
+Tourista includes these runtime dependencies:
 
 - **@tinystack/machine** (^0.1.0) - State machine implementation
 - **@floating-ui/react** (^0.27.16) - Positioning engine for tour cards
@@ -55,18 +55,18 @@ All three dependencies are required for the library to function properly.
 If you want to use the default components with proper styling:
 
 1. Ensure you have Tailwind CSS v4 installed
-2. Add the touring package to your Tailwind CSS sources in your CSS file:
+2. Add the tourista package to your Tailwind CSS sources in your CSS file:
 
 ```css
 /* In your global CSS file */
-@source '../../node_modules/@tinystack/touring/dist/**/*.{js,mjs}';
+@source '../../node_modules/Tourista/dist/**/*.{js,mjs}';
 ```
 
 This ensures Tailwind can detect and compile the classes used in the library's default components.
 
 ## Next.js Configuration
 
-Since @tinystack/touring uses client-side features, components must be marked with the `'use client'` directive when used in Next.js App Router.
+Since Tourista uses client-side features, components must be marked with the `'use client'` directive when used in Next.js App Router.
 
 No additional Next.js configuration is required. The library works out of the box with the App Router.
 
@@ -75,7 +75,7 @@ No additional Next.js configuration is required. The library works out of the bo
 After installation, you can verify it's working by importing the main components:
 
 ```tsx
-import { TourProvider, TourMachine } from '@tinystack/touring';
+import { TourProvider, TourMachine } from 'Tourista';
 
 // If TypeScript shows no errors, the installation was successful
 ```
@@ -99,7 +99,7 @@ If you encounter module resolution errors:
 
 If you see hydration errors in Next.js:
 
-1. Ensure components using @tinystack/touring are marked with `'use client'`
+1. Ensure components using Tourista are marked with `'use client'`
 2. Wrap dynamic content in a client-only boundary if needed
 
 ### TypeScript Errors

@@ -1,6 +1,6 @@
 # Development Setup
 
-This guide will help you set up a local development environment for contributing to @tinystack/touring.
+This guide will help you set up a local development environment for contributing to Tourista.
 
 ## Prerequisites
 
@@ -27,6 +27,7 @@ pnpm run dev:setup
 ```
 
 This script (`scripts/setup-dev.sh`) will:
+
 1. Install dependencies
 2. Build the library once
 3. Create a global pnpm link
@@ -60,19 +61,19 @@ After setting up the library, link it in your test project:
 # Navigate to your Next.js app
 cd ../your-nextjs-app
 
-# Link the library (note: it's "touring" not "@tinystack/touring" for local link)
-pnpm link touring --global
+# Link the library (note: it's "tourista" not "Tourista" for local link)
+pnpm link tourista --global
 ```
 
 ### Using the Demo Application
 
-If you're using the touring-demo repository:
+If you're using the tourista-demo repository:
 
 ```bash
 # Clone the demo
 cd ..
-git clone [demo-repo-url] touring-demo
-cd touring-demo
+git clone [demo-repo-url] tourista-demo
+cd tourista-demo
 
 # Use the demo's link script
 pnpm run dev:link
@@ -82,19 +83,19 @@ The demo's `dev:link` script handles cleanup and linking automatically.
 
 ## Available Scripts in Library
 
-| Script | Description |
-|--------|------------|
-| `pnpm run build` | Build library with tsup (cjs, esm, dts) |
-| `pnpm run dev` | Watch mode - rebuilds on changes |
-| `pnpm run dev:setup` | Run setup script (install, build, link, watch) |
-| `pnpm run type:check` | TypeScript type checking |
-| `pnpm run lint` | Run ESLint |
-| `pnpm run lint:fix` | Auto-fix ESLint issues |
-| `pnpm run link` | Create global pnpm link |
-| `pnpm run unlink` | Remove global pnpm link |
-| `pnpm run version:patch` | Bump patch version |
-| `pnpm run version:minor` | Bump minor version |
-| `pnpm run version:major` | Bump major version |
+| Script                   | Description                                    |
+| ------------------------ | ---------------------------------------------- |
+| `pnpm run build`         | Build library with tsup (cjs, esm, dts)        |
+| `pnpm run dev`           | Watch mode - rebuilds on changes               |
+| `pnpm run dev:setup`     | Run setup script (install, build, link, watch) |
+| `pnpm run type:check`    | TypeScript type checking                       |
+| `pnpm run lint`          | Run ESLint                                     |
+| `pnpm run lint:fix`      | Auto-fix ESLint issues                         |
+| `pnpm run link`          | Create global pnpm link                        |
+| `pnpm run unlink`        | Remove global pnpm link                        |
+| `pnpm run version:patch` | Bump patch version                             |
+| `pnpm run version:minor` | Bump minor version                             |
+| `pnpm run version:major` | Bump major version                             |
 
 ## Build Configuration
 
@@ -168,30 +169,33 @@ react-onboard-tour/           # Library repository
 If the linked package isn't recognized:
 
 1. Verify global link exists:
+
    ```bash
    pnpm list -g --depth=0
    ```
 
 2. Unlink and relink:
+
    ```bash
    # In library (react-onboard-tour)
    pnpm run unlink
    pnpm run link
-   
+
    # In test project
-   pnpm unlink touring --global
-   pnpm link touring --global
+   pnpm unlink tourista --global
+   pnpm link tourista --global
    ```
 
 3. Note the package name difference:
-   - Published package: `@tinystack/touring`
-   - Local development link: `touring`
+   - Published package: `Tourista`
+   - Local development link: `tourista`
 
 ### Build Errors
 
 If build fails:
 
 1. Clear the dist folder:
+
    ```bash
    rm -rf dist
    ```

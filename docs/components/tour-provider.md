@@ -5,7 +5,7 @@ The `TourProvider` component is a React context provider that manages tour state
 ## Usage
 
 ```tsx
-import { TourProvider } from '@tinystack/touring';
+import { TourProvider } from 'Tourista';
 
 const tours = [
   {
@@ -135,16 +135,13 @@ Internal handler for completing tours. Generally not used directly.
 Access the tour context from any child component.
 
 ```tsx
-import { useTourContext } from '@tinystack/touring';
+import { useTourContext } from 'Tourista';
 
 function MyComponent() {
   const { startTour, endTour, isActive, tourConfig } = useTourContext();
-  
+
   return (
-    <button 
-      onClick={() => startTour('welcome')}
-      disabled={isActive}
-    >
+    <button onClick={() => startTour('welcome')} disabled={isActive}>
       {isActive ? 'Tour Active' : 'Start Tour'}
     </button>
   );
@@ -165,20 +162,26 @@ function MyComponent() {
 ```tsx
 'use client';
 
-import { TourProvider, TourMachine } from '@tinystack/touring';
+import { TourProvider, TourMachine } from 'Tourista';
 
 const tours = [
   {
     id: 'onboarding',
-    steps: [/* ... */],
+    steps: [
+      /* ... */
+    ],
   },
   {
     id: 'feature-highlight',
-    steps: [/* ... */],
+    steps: [
+      /* ... */
+    ],
   },
   {
     id: 'help-tour',
-    steps: [/* ... */],
+    steps: [
+      /* ... */
+    ],
   },
 ];
 
@@ -194,18 +197,18 @@ export function RootLayout({ children }) {
 
 ## Props Summary Table
 
-| Prop | Type | Required | Default | Description |
-|------|------|----------|---------|-------------|
-| `tours` | `TourConfig[]` | Yes | - | Array of tour configurations |
-| `children` | `ReactNode` | Yes | - | Child components that need tour access |
+| Prop       | Type           | Required | Default | Description                            |
+| ---------- | -------------- | -------- | ------- | -------------------------------------- |
+| `tours`    | `TourConfig[]` | Yes      | -       | Array of tour configurations           |
+| `children` | `ReactNode`    | Yes      | -       | Child components that need tour access |
 
 ## Context API Table
 
-| Property | Type | Description |
-|----------|------|-------------|
-| `startTour` | `(tourId: string) => void` | Starts a tour by ID |
-| `endTour` | `() => void` | Ends the active tour |
-| `isActive` | `boolean` | Whether a tour is active |
-| `tourConfig` | `TourConfig \| undefined` | Active tour configuration |
-| `handleSkip` | `() => void` | Internal skip handler |
-| `handleComplete` | `() => void` | Internal complete handler |
+| Property         | Type                       | Description               |
+| ---------------- | -------------------------- | ------------------------- |
+| `startTour`      | `(tourId: string) => void` | Starts a tour by ID       |
+| `endTour`        | `() => void`               | Ends the active tour      |
+| `isActive`       | `boolean`                  | Whether a tour is active  |
+| `tourConfig`     | `TourConfig \| undefined`  | Active tour configuration |
+| `handleSkip`     | `() => void`               | Internal skip handler     |
+| `handleComplete` | `() => void`               | Internal complete handler |

@@ -8,7 +8,7 @@ The `DebugPanel` component is a development tool that displays real-time tour st
 
 ```css
 /* In your global.css or app.css */
-@source '../../node_modules/@tinystack/touring/dist/**/*.{js,mjs}';
+@source '../../node_modules/Tourista/dist/**/*.{js,mjs}';
 ```
 
 Since this is a development tool, you might not need to configure this in production builds.
@@ -16,13 +16,13 @@ Since this is a development tool, you might not need to configure this in produc
 ## Usage
 
 ```tsx
-import { TourProvider, TourMachine, DebugPanel } from '@tinystack/touring';
+import { TourProvider, TourMachine, DebugPanel } from 'Tourista';
 
 function App() {
   return (
     <TourProvider tours={tours}>
       <TourMachine />
-      <DebugPanel tourId="onboarding" />
+      <DebugPanel tourId='onboarding' />
       {/* Your app */}
     </TourProvider>
   );
@@ -40,7 +40,7 @@ The ID of the tour to debug.
 - **Default**: None
 
 ```tsx
-<DebugPanel tourId="welcome-tour" />
+<DebugPanel tourId='welcome-tour' />
 ```
 
 ## Features
@@ -62,7 +62,7 @@ The debug panel shows:
 
 - **Position**: Fixed at bottom-left of viewport
 - **Collapsible**: Can be minimized to save screen space
-- **Color Coding**: 
+- **Color Coding**:
   - Green for active/normal states
   - Yellow for auto-advance
   - Purple for async operations
@@ -71,6 +71,7 @@ The debug panel shows:
 ### State Detection
 
 Automatically detects and displays:
+
 - Pending states (`*_pending`)
 - Processing states (`*_processing`)
 - Success states (`*_success`)
@@ -82,7 +83,7 @@ Automatically detects and displays:
 ```tsx
 'use client';
 
-import { TourProvider, TourMachine, DebugPanel } from '@tinystack/touring';
+import { TourProvider, TourMachine, DebugPanel } from 'Tourista';
 
 export function AppWithDebug() {
   const tours = [
@@ -104,7 +105,7 @@ export function AppWithDebug() {
       <TourMachine />
       {/* Only show in development */}
       {process.env.NODE_ENV === 'development' && (
-        <DebugPanel tourId="debug-tour" />
+        <DebugPanel tourId='debug-tour' />
       )}
       {/* Your app */}
     </TourProvider>
@@ -122,9 +123,9 @@ function DebugControls() {
   return (
     <>
       <select onChange={(e) => setDebugTourId(e.target.value)}>
-        <option value="onboarding">Onboarding Tour</option>
-        <option value="feature">Feature Tour</option>
-        <option value="help">Help Tour</option>
+        <option value='onboarding'>Onboarding Tour</option>
+        <option value='feature'>Feature Tour</option>
+        <option value='help'>Help Tour</option>
       </select>
       <DebugPanel tourId={debugTourId} />
     </>
@@ -137,6 +138,7 @@ function DebugControls() {
 ### Active Tour State
 
 When a tour is active, displays:
+
 - All tour information
 - Green color scheme
 - Collapsible interface
@@ -144,6 +146,7 @@ When a tour is active, displays:
 ### Inactive State
 
 When no tour is active or tour ID doesn't match:
+
 - Shows "No active tour" message
 - Gray color scheme
 - Minimal interface
@@ -151,6 +154,7 @@ When no tour is active or tour ID doesn't match:
 ### Collapsed State
 
 When minimized:
+
 - Shows "Show Debug Info" button
 - Preserves state when expanded again
 
@@ -159,6 +163,7 @@ When minimized:
 ### Context Display
 
 Shows the full state machine context including:
+
 - `tourId`: Current tour identifier
 - `currentPage`: Current page path
 - `targetElement`: Target CSS selector
@@ -174,6 +179,7 @@ Shows the full state machine context including:
 ### Async State Indicators
 
 For async steps, shows custom messages:
+
 - **Pending**: "⏸️ Waiting for payment"
 - **Processing**: "⏳ Processing payment..."
 - **Success**: "✅ Payment complete!"
@@ -181,6 +187,7 @@ For async steps, shows custom messages:
 ## Styling
 
 The component uses Tailwind CSS classes by default:
+
 - Fixed positioning with `z-[9998]` to stay above most content
 - Responsive width of `w-80` (20rem)
 - Border and shadow for visibility
@@ -199,32 +206,34 @@ The component uses Tailwind CSS classes by default:
 Best practice for production:
 
 ```tsx
-{process.env.NODE_ENV === 'development' && (
-  <DebugPanel tourId="my-tour" />
-)}
+{
+  process.env.NODE_ENV === 'development' && <DebugPanel tourId='my-tour' />;
+}
 ```
 
 Or with a feature flag:
 
 ```tsx
-{debugMode && <DebugPanel tourId="my-tour" />}
+{
+  debugMode && <DebugPanel tourId='my-tour' />;
+}
 ```
 
 ## Props Summary Table
 
-| Prop | Type | Required | Default | Description |
-|------|------|----------|---------|-------------|
-| `tourId` | `string` | Yes | - | ID of the tour to debug |
+| Prop     | Type     | Required | Default | Description             |
+| -------- | -------- | -------- | ------- | ----------------------- |
+| `tourId` | `string` | Yes      | -       | ID of the tour to debug |
 
 ## Display Information Table
 
-| Information | Description | Visual Indicator |
-|-------------|-------------|------------------|
-| Tour ID | Active tour identifier | Green background |
-| Current State | State machine state | Green text |
-| Is Active | Tour activity status | Green (Yes) / Red (No) |
-| Target Element | CSS selector | Green text |
-| Context | Full state context | Gray background, monospace |
-| Navigation | Can go next/prev | ✅ or ❌ icons |
-| Auto-advance | Timer status | Yellow background |
-| Async Status | Async step state | Purple background |
+| Information    | Description            | Visual Indicator           |
+| -------------- | ---------------------- | -------------------------- |
+| Tour ID        | Active tour identifier | Green background           |
+| Current State  | State machine state    | Green text                 |
+| Is Active      | Tour activity status   | Green (Yes) / Red (No)     |
+| Target Element | CSS selector           | Green text                 |
+| Context        | Full state context     | Gray background, monospace |
+| Navigation     | Can go next/prev       | ✅ or ❌ icons             |
+| Auto-advance   | Timer status           | Yellow background          |
+| Async Status   | Async step state       | Purple background          |

@@ -8,7 +8,7 @@ The `DefaultCard` component is the built-in tour card UI that displays tour cont
 
 ```css
 /* In your global.css or app.css */
-@source '../../node_modules/@tinystack/touring/dist/**/*.{js,mjs}';
+@source '../../node_modules/Tourista/dist/**/*.{js,mjs}';
 ```
 
 If you don't want to use Tailwind CSS, you should provide a custom card component instead.
@@ -18,10 +18,10 @@ If you don't want to use Tailwind CSS, you should provide a custom card componen
 The DefaultCard is used automatically by TourMachine. To use a custom card instead:
 
 ```tsx
-import { TourMachine } from '@tinystack/touring';
+import { TourMachine } from 'Tourista';
 import { CustomCard } from './CustomCard';
 
-<TourMachine customCard={CustomCard} />
+<TourMachine customCard={CustomCard} />;
 ```
 
 ## Props (CardProps Interface)
@@ -145,6 +145,7 @@ Whether to show navigation controls (prev/next buttons).
 ### Progress Bar
 
 Visual indicator showing tour progress:
+
 - Blue fill indicates completed percentage
 - Smooth animation between steps
 - Shows `(current step) of (total steps)` text
@@ -159,6 +160,7 @@ Visual indicator showing tour progress:
 ### Styling
 
 Default styles include:
+
 - White background with rounded corners
 - Shadow for depth
 - Responsive padding
@@ -170,7 +172,7 @@ Default styles include:
 To create a custom card component, implement the `CardProps` interface:
 
 ```tsx
-import { CardProps } from '@tinystack/touring';
+import { CardProps } from 'Tourista';
 import { forwardRef } from 'react';
 
 const CustomCard = forwardRef<HTMLDivElement, CardProps>(
@@ -199,19 +201,19 @@ const CustomCard = forwardRef<HTMLDivElement, CardProps>(
       <div ref={ref} className={className} style={style}>
         <h3>{title}</h3>
         <p>{content}</p>
-        
+
         {/* Progress */}
         <div>
           Step {currentStepIndex + 1} of {totalSteps}
         </div>
-        
+
         {/* Navigation */}
         {showControls && (
           <div>
             <button onClick={prevStep} disabled={!canGoPrev}>
               Back
             </button>
-            
+
             {!canGoNext && isLastStep ? (
               <button onClick={endTour}>Finish</button>
             ) : (
@@ -219,10 +221,8 @@ const CustomCard = forwardRef<HTMLDivElement, CardProps>(
                 Next
               </button>
             )}
-            
-            {canSkip && !isLastStep && (
-              <button onClick={skipTour}>Skip</button>
-            )}
+
+            {canSkip && !isLastStep && <button onClick={skipTour}>Skip</button>}
           </div>
         )}
       </div>
@@ -244,40 +244,40 @@ export default CustomCard;
 
 ## Props Summary Table
 
-| Prop | Type | Required | Default | Description |
-|------|------|----------|---------|-------------|
-| `title` | `string \| undefined` | No | - | Step title text |
-| `content` | `string \| undefined` | No | - | Step content text |
-| `currentStepIndex` | `number` | Yes | - | Current step index (0-based) |
-| `totalSteps` | `number` | Yes | - | Total number of steps |
-| `canGoNext` | `boolean` | Yes | - | Can navigate forward |
-| `canGoPrev` | `boolean` | Yes | - | Can navigate backward |
-| `canSkip` | `boolean \| undefined` | No | - | Can skip tour |
-| `nextStep` | `() => void` | Yes | - | Navigate to next step |
-| `prevStep` | `() => void` | Yes | - | Navigate to previous step |
-| `skipTour` | `() => void` | Yes | - | Skip/exit tour |
-| `endTour` | `() => void` | Yes | - | End tour properly |
-| `className` | `string \| undefined` | No | - | CSS class name |
-| `style` | `React.CSSProperties \| undefined` | No | - | Inline styles |
-| `showControls` | `boolean \| undefined` | No | `true` | Show nav controls |
+| Prop               | Type                               | Required | Default | Description                  |
+| ------------------ | ---------------------------------- | -------- | ------- | ---------------------------- |
+| `title`            | `string \| undefined`              | No       | -       | Step title text              |
+| `content`          | `string \| undefined`              | No       | -       | Step content text            |
+| `currentStepIndex` | `number`                           | Yes      | -       | Current step index (0-based) |
+| `totalSteps`       | `number`                           | Yes      | -       | Total number of steps        |
+| `canGoNext`        | `boolean`                          | Yes      | -       | Can navigate forward         |
+| `canGoPrev`        | `boolean`                          | Yes      | -       | Can navigate backward        |
+| `canSkip`          | `boolean \| undefined`             | No       | -       | Can skip tour                |
+| `nextStep`         | `() => void`                       | Yes      | -       | Navigate to next step        |
+| `prevStep`         | `() => void`                       | Yes      | -       | Navigate to previous step    |
+| `skipTour`         | `() => void`                       | Yes      | -       | Skip/exit tour               |
+| `endTour`          | `() => void`                       | Yes      | -       | End tour properly            |
+| `className`        | `string \| undefined`              | No       | -       | CSS class name               |
+| `style`            | `React.CSSProperties \| undefined` | No       | -       | Inline styles                |
+| `showControls`     | `boolean \| undefined`             | No       | `true`  | Show nav controls            |
 
 ## Default Styling Values
 
-| Element | Style | Value |
-|---------|-------|-------|
-| **Container** | Background | `white` |
-| | Border Radius | `0.5rem` |
-| | Padding | `1rem` |
-| | Min Width | `16rem` |
-| | Max Width | `32rem` |
-| **Title** | Font Size | `1.125rem` |
-| | Font Weight | `bold` |
-| **Content** | Font Size | `0.875rem` |
-| **Progress Bar** | Height | `0.625rem` |
-| | Background | `#E5E7EB` |
-| | Fill Color | `#2563EB` |
-| **Buttons** | Padding | `0.5rem 1rem` |
-| | Border Radius | `0.375rem` |
-| | Next Color | `#2563EB` |
-| | Finish Color | `#10B981` |
-| | Skip/Prev Color | `#F3F4F6` |
+| Element          | Style           | Value         |
+| ---------------- | --------------- | ------------- |
+| **Container**    | Background      | `white`       |
+|                  | Border Radius   | `0.5rem`      |
+|                  | Padding         | `1rem`        |
+|                  | Min Width       | `16rem`       |
+|                  | Max Width       | `32rem`       |
+| **Title**        | Font Size       | `1.125rem`    |
+|                  | Font Weight     | `bold`        |
+| **Content**      | Font Size       | `0.875rem`    |
+| **Progress Bar** | Height          | `0.625rem`    |
+|                  | Background      | `#E5E7EB`     |
+|                  | Fill Color      | `#2563EB`     |
+| **Buttons**      | Padding         | `0.5rem 1rem` |
+|                  | Border Radius   | `0.375rem`    |
+|                  | Next Color      | `#2563EB`     |
+|                  | Finish Color    | `#10B981`     |
+|                  | Skip/Prev Color | `#F3F4F6`     |

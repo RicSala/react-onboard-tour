@@ -5,7 +5,7 @@ The `TourMachine` component is the core tour engine that handles state managemen
 ## Usage
 
 ```tsx
-import { TourProvider, TourMachine } from '@tinystack/touring';
+import { TourProvider, TourMachine } from 'Tourista';
 
 function App() {
   return (
@@ -224,7 +224,7 @@ Handles browser back button - skips the tour if user navigates back.
 ```tsx
 'use client';
 
-import { TourProvider, TourMachine } from '@tinystack/touring';
+import { TourProvider, TourMachine } from 'Tourista';
 import { CustomTourCard } from './CustomTourCard';
 
 const tours = [

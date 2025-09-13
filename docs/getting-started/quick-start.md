@@ -10,7 +10,7 @@ If you're using the default `DefaultCard` or `DebugPanel` components, you'll nee
 
 ```css
 /* In your global.css or app.css */
-@source '../../node_modules/@tinystack/touring/dist/**/*.{js,mjs}';
+@source '../../node_modules/Tourista/dist/**/*.{js,mjs}';
 ```
 
 **Note**: This is NOT required if you're using a custom card component.
@@ -56,7 +56,7 @@ In your Next.js app, wrap your application with `TourProvider` and add `TourMach
 // app/layout.tsx or your root component
 'use client';
 
-import { TourProvider, TourMachine } from '@tinystack/touring';
+import { TourProvider, TourMachine } from 'Tourista';
 
 const tours = [tourConfig]; // Array of tour configurations
 
@@ -85,7 +85,7 @@ Use the `useTourContext` hook to start tours programmatically:
 ```tsx
 'use client';
 
-import { useTourContext } from '@tinystack/touring';
+import { useTourContext } from 'Tourista';
 
 export function StartTourButton() {
   const { startTour } = useTourContext();
@@ -102,7 +102,7 @@ Here's a minimal working example:
 // app/tour-demo/page.tsx
 'use client';
 
-import { TourProvider, TourMachine, useTourContext } from '@tinystack/touring';
+import { TourProvider, TourMachine, useTourContext } from 'Tourista';
 
 const tourConfig = {
   id: 'demo-tour',
@@ -179,7 +179,7 @@ Users can navigate through the tour using:
 
 ### Client Components
 
-All components using @tinystack/touring must be client components (use `'use client'` directive in Next.js App Router).
+All components using Tourista must be client components (use `'use client'` directive in Next.js App Router).
 
 ### Element Targeting
 
@@ -198,30 +198,30 @@ The tour uses the `page` property in each step to determine where it should be d
 
 ## Project Structure
 
-When working with @tinystack/touring, here's what gets imported:
+When working with Tourista, here's what gets imported:
 
 ```tsx
-import { 
+import {
   // Components
-  TourProvider,        // Context provider for tours
-  TourMachine,         // Core tour component
-  TourOverlay,         // Overlay component (usually not needed directly)
-  DefaultCard,         // Default card component
-  DebugPanel,          // Debug panel for development
-  
+  TourProvider, // Context provider for tours
+  TourMachine, // Core tour component
+  TourOverlay, // Overlay component (usually not needed directly)
+  DefaultCard, // Default card component
+  DebugPanel, // Debug panel for development
+
   // Hooks
-  useTourContext,      // Access tour context (start/stop tours)
-  useTour,             // Control specific tour (navigation, state)
-  
+  useTourContext, // Access tour context (start/stop tours)
+  useTour, // Control specific tour (navigation, state)
+
   // Helpers
   generateTourMachine, // Generate state machine from config
-  createTourHelpers,   // Create tour helper functions
-  
+  createTourHelpers, // Create tour helper functions
+
   // Types
-  TourConfig,          // Tour configuration type
-  TourStep,            // Tour step type
-  CardProps,           // Props for custom cards
-} from '@tinystack/touring';
+  TourConfig, // Tour configuration type
+  TourStep, // Tour step type
+  CardProps, // Props for custom cards
+} from 'Tourista';
 ```
 
 ## Troubleshooting
@@ -229,21 +229,22 @@ import {
 ### Common Issues
 
 **Tour not starting?**
+
 - Ensure TourProvider wraps your application
 - Check that the tour ID matches exactly
 - Verify components are marked with `'use client'` directive
 
 **Elements not highlighting?**
+
 - Verify target element selector is correct
 - Ensure element exists in DOM when step is active
 - Check that element is visible (not `display: none`)
 
 **TypeScript errors?**
+
 - Restart TypeScript server in your IDE
 - Use `as const satisfies TourConfig` for better type inference
 - Check that all required properties are present
-
-
 
 ## Next Steps
 

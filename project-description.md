@@ -1,12 +1,13 @@
-# @tinystack/touring
+# Tourista
 
 ## Project Overview
 
-@tinystack/touring is a state-machine-driven onboarding tour library for React applications, specifically designed for Next.js. Built on top of the @tinystack/machine state management library, it provides a declarative API for creating interactive product tours with support for both synchronous and asynchronous steps.
+Tourista is a state-machine-driven onboarding tour library for React applications, specifically designed for Next.js. Built on top of the @tinystack/machine state management library, it provides a declarative API for creating interactive product tours with support for both synchronous and asynchronous steps.
 
 ## Key Features
 
 ### 🎯 Core Capabilities
+
 - **State Machine Architecture**: Uses finite state machines for predictable, debuggable tour flows
 - **Async Step Support**: Handles asynchronous operations with pending, processing, and success states
 - **Multi-Page Tours**: Navigate users across different routes using Next.js App Router
@@ -15,12 +16,14 @@
 - **Navigation Control**: Configure forward/backward navigation permissions per step
 
 ### 🎨 Customization
+
 - **Custom Card Components**: Replace default tour cards with your own React components
 - **Overlay Styling**: Customize overlay appearance (opacity, color, padding, border radius)
 - **Card Positioning**: Control card placement relative to target elements (top, bottom, left, right)
 - **Event Handlers**: Hook into tour lifecycle events for custom behaviors
 
 ### 🔧 Developer Experience
+
 - **TypeScript Support**: Full TypeScript support with type inference for tour configurations
 - **Next.js Integration**: Built for Next.js App Router with client-side navigation
 - **Debug Panel**: Built-in debugging component for development
@@ -29,12 +32,15 @@
 ## Technical Architecture
 
 ### State Management
+
 The library uses a finite state machine approach where each tour is composed of:
+
 - **Sync Steps**: Simple sequential states
 - **Async Steps**: Complex states with pending → processing → success substates
 - **Navigation States**: Intermediate states for page transitions
 
 ### Component Structure
+
 - `TourProvider`: Context provider for managing multiple tours
 - `TourMachine`: Core state machine component handling tour logic
 - `TourOverlay`: Visual overlay component with spotlight effect
@@ -42,7 +48,9 @@ The library uses a finite state machine approach where each tour is composed of:
 - `DebugPanel`: Development tool for inspecting tour state
 
 ### Event System
+
 Tours communicate through a typed event system:
+
 - Base events: `START_TOUR`, `NEXT`, `PREV`, `END_TOUR`, `SKIP_TOUR`
 - Custom events: Configurable per async step for external integrations
 - Page navigation: `PAGE_CHANGED` events for route-based transitions
@@ -73,6 +81,7 @@ Tours communicate through a typed event system:
 ## Development Status
 
 Version 0.1.10 - The library is in early development. Current focus areas:
+
 - Core stability and bug fixes
 - API refinement based on usage patterns
 - Documentation and examples
