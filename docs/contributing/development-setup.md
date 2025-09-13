@@ -14,8 +14,8 @@ This guide will help you set up a local development environment for contributing
 ### 1. Clone the Library Repository
 
 ```bash
-git clone [library-repo-url]
-cd react-onboard-tour
+git clone https://github.com/RicSala/tourista.git
+cd tourista
 ```
 
 ### 2. Quick Development Setup
@@ -135,7 +135,7 @@ pnpm run lint:fix
 ## Project Structure
 
 ```
-react-onboard-tour/           # Library repository
+tourista/                     # Library repository
 ├── src/                      # Source code
 │   ├── components/           # React components
 │   │   ├── TourProvider.tsx
@@ -177,7 +177,7 @@ If the linked package isn't recognized:
 2. Unlink and relink:
 
    ```bash
-   # In library (react-onboard-tour)
+   # In library (tourista)
    pnpm run unlink
    pnpm run link
 

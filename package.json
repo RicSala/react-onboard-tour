@@ -2,6 +2,14 @@
   "name": "tourista",
   "version": "0.0.2",
   "description": "A flexible onboarding tour library for React applications",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/RicSala/tourista.git"
+  },
+  "homepage": "https://github.com/RicSala/tourista",
+  "bugs": {
+    "url": "https://github.com/RicSala/tourista/issues"
+  },
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
   "types": "./dist/index.d.ts",
