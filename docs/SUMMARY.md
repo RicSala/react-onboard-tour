@@ -86,10 +86,10 @@
 * [E-commerce Onboarding](examples/ecommerce-onboarding.md)
 * [API Integration](examples/api-integration.md) -->
 
-## Contributing (WIP)
+## Contributing
 
 - [Development Setup](contributing/development-setup.md)
 - [Architecture](contributing/architecture.md)
-- [Testing](contributing/testing.md)
-- [Code Style](contributing/code-style.md)
-- [Pull Requests](contributing/pull-requests.md)
+- [Testing (WIP)](contributing/testing.md)
+- [Code Style (WIP)](contributing/code-style.md)
+- [Pull Requests (WIP)](contributing/pull-requests.md)
