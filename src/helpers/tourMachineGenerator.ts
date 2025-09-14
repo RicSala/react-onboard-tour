@@ -149,7 +149,7 @@ function generateBaseTourMachine<
         assign(() => ({ autoAdvanceTimer: undefined })),
       ];
 
-      // Add AUTO_ADVANCE handler
+      // Add AUTO_ADVANCE handler (works regardless of canNext)
       if (!isLastState) {
         const nextPage = nextExpandedState?.step.page;
         const currentPage = step.page;
@@ -202,7 +202,7 @@ function generateBaseTourMachine<
       };
     } else if (step.type === 'async' && subState === 'success') {
       // Async success state - can go next or back to pending
-      if (!isLastState) {
+      if (!isLastState && step.canNext !== false) {
         const nextPage = nextExpandedState?.step.page;
         state.on.NEXT =
           nextPage !== step.page
@@ -226,7 +226,7 @@ function generateBaseTourMachine<
                   },
                 ],
               };
-        
+
         // Handle automatic navigation after success (e.g., login redirects)
         if (nextPage !== step.page) {
           state.on.PAGE_CHANGED = {
@@ -235,13 +235,16 @@ function generateBaseTourMachine<
               {
                 condition: (context: any, event: any) => {
                   // If page changed to the next step's page, auto-advance
-                  return event.page === nextExpandedState.step.page && event.tourId === context.tourId;
+                  return (
+                    event.page === nextExpandedState.step.page &&
+                    event.tourId === context.tourId
+                  );
                 },
               },
             ],
           };
         }
-      } else {
+      } else if (step.canNext !== false) {
         state.on.NEXT = {
           target: 'completed',
           guards: [
@@ -257,7 +260,7 @@ function generateBaseTourMachine<
       // Don't allow going back from success state to prevent re-doing async task
     } else {
       // Regular sync state
-      if (!isLastState) {
+      if (!isLastState && step.canNext !== false) {
         const nextPage = nextExpandedState?.step.page;
         state.on.NEXT =
           nextPage !== step.page
@@ -281,7 +284,7 @@ function generateBaseTourMachine<
                   },
                 ],
               };
-      } else {
+      } else if (step.canNext !== false) {
         state.on.NEXT = {
           target: 'completed',
           guards: [
@@ -698,7 +701,7 @@ export function createTourHelpers<const T extends TourConfig>(config: T) {
   return {
     getAsyncTask: (stepId: AsyncStepIds) => {
       const step = config.steps.find((s) => s.id === stepId);
-      if (!step) return null;
+      if (!step) throw new Error(`Step ${stepId} not found`);
       return getAsyncTaskInfo(step) as unknown as {
         taskId: string;
         states: {

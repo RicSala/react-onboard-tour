@@ -3,7 +3,10 @@
 import { useEffect, useMemo, useSyncExternalStore } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import { TourOverlay } from './TourOverlay';
-import { generateTourMachine } from '../helpers/tourMachineGenerator';
+import {
+  generateTourMachine,
+  createTourHelpers,
+} from '../helpers/tourMachineGenerator';
 import { StateMachine } from '@tinystack/machine';
 import {
   TourContext,
@@ -22,10 +25,10 @@ import { CARD_POSITIONING_DEFAULT, STYLE_DEFAULT } from '../const';
 interface TourMachineReactProps {
   customCard?: ComponentType<CardProps>;
   closeOnClickOutside?: boolean;
-  onComplete?: () => void;
-  onSkip?: () => void;
-  onNext?: () => void;
-  onPrev?: () => void;
+  onComplete?: (tourId: string) => void;
+  onStart?: (tourId: string) => void;
+  onSkip?: (stepIndex: number, stepId: string, tourId: string) => void;
+  onStepChange?: (stepIndex: number, stepId: string, tourId: string) => void;
   cardPositioning?: CardPositioning;
   overlayStyles?: OverlayStyles;
 }
@@ -40,7 +43,9 @@ export const TourMachineCore: React.FC<TourMachineReactProps> = ({
   cardPositioning: cardPositioningProp,
   overlayStyles: overlayStylesProp,
   onComplete,
+  onStart,
   onSkip,
+  onStepChange,
 }) => {
   const pathname = usePathname();
   const router = useRouter();
@@ -63,6 +68,11 @@ export const TourMachineCore: React.FC<TourMachineReactProps> = ({
     handleSkip: () => void;
     handleComplete: () => void;
   };
+
+  // Create tour helpers for step index calculation
+  const tourHelpers = useMemo(() => {
+    return createTourHelpers(tourConfig);
+  }, [tourConfig]);
 
   // on pop state skip the tour and clean up the actor
   useEffect(() => {
@@ -102,6 +112,7 @@ export const TourMachineCore: React.FC<TourMachineReactProps> = ({
 
     tourActor.start();
     tourActor.send({ type: 'START_TOUR', tourId: tourConfig.id });
+    onStart?.(tourConfig.id);
 
     // Only cleanup on true unmount (when component is removed)
     return () => {
@@ -110,25 +121,60 @@ export const TourMachineCore: React.FC<TourMachineReactProps> = ({
       tourActor = null;
       tourMachine = null;
     };
-  }, [tourConfig]); // Only depend on tour ID, not the whole config object
+  }, [onStart, tourConfig]); // Only depend on tour ID, not the whole config object
 
-  // Handle completion/skip callbacks in a separate effect
+  // Handle completion/skip callbacks and step changes
   useEffect(() => {
     if (!tourActor) return;
 
+    let previousStepIndex = -1;
+
     const unsubscribe = tourActor.subscribe((snapshot) => {
-      if (snapshot.value === 'completed') {
+      const currentState = snapshot.value;
+      if (snapshot.status !== 'active') return;
+
+      // Handle completion and skip
+      if (currentState === 'completed') {
         handleComplete?.();
-        onComplete?.();
+        onComplete?.(tourConfig.id);
       }
-      if (snapshot.value === 'skipped') {
+      if (currentState === 'skipped') {
+        const skipIndex = previousStepIndex >= 0 ? previousStepIndex : 0;
+        const skipStepId = tourConfig.steps[skipIndex]?.id || '';
+        onSkip?.(skipIndex, skipStepId, tourConfig.id);
         handleSkip?.();
-        onSkip?.();
+      }
+
+      // Handle step changes - skip navigation states and idle/completed/skipped states
+      if (
+        currentState &&
+        !currentState.includes('navigatingTo') &&
+        currentState !== 'idle' &&
+        currentState !== 'completed' &&
+        currentState !== 'skipped'
+      ) {
+        const currentStepIndex = tourHelpers.getStepIndex(currentState);
+
+        // Only call onStepChange if the step actually changed
+        if (currentStepIndex !== previousStepIndex && currentStepIndex >= 0) {
+          const stepId = tourConfig.steps[currentStepIndex]?.id || '';
+          onStepChange?.(currentStepIndex, stepId, tourConfig.id);
+          previousStepIndex = currentStepIndex;
+        }
       }
     });
 
     return unsubscribe;
-  }, [onComplete, onSkip, handleSkip, handleComplete]);
+  }, [
+    onComplete,
+    onSkip,
+    handleSkip,
+    handleComplete,
+    onStepChange,
+    tourConfig.id,
+    tourHelpers,
+    tourConfig.steps,
+  ]);
 
   // Use the actor's snapshot directly with useSyncExternalStore
   const snapshot = useSyncExternalStore(

@@ -97,8 +97,8 @@ const DefaultCard = forwardRef<HTMLDivElement, CardProps>(
           <span style={{ color: '#6B7280', whiteSpace: 'nowrap' }}>
             {currentStepIndex + 1} of {totalSteps}
           </span>
-          {/* Only show Finish when we're at the last step AND can't go next (final state) */}
-          {!canGoNext && isLastStep ? (
+          {/* Show Finish/Complete button on last step */}
+          {isLastStep ? (
             <button
               onClick={endTour}
               style={{
@@ -112,7 +112,7 @@ const DefaultCard = forwardRef<HTMLDivElement, CardProps>(
                 border: 'none',
               }}
             >
-              Finish
+              Complete
             </button>
           ) : (
             <button

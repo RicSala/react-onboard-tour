@@ -103,7 +103,7 @@ const { startTour } = useTourContext();
 
 // Control
 const tour = useTour('my-tour');
-tour?.nextStep();
+tour.nextStep();
 ```
 
 ### 4. Type Inference

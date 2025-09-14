@@ -60,6 +60,7 @@ export type TourStep =
       title: string;
       content: string;
       autoAdvance?: number; // milliseconds
+      canNext?: boolean; // Whether to allow forward navigation
       canPrev?: boolean; // Whether to allow backward navigation
       canSkip?: boolean; // Whether to allow skipping this step
     }
@@ -77,6 +78,7 @@ export type TourStep =
         success?: string;
         failed?: string;
       };
+      canNext?: boolean; // Whether to allow forward navigation
       canPrev?: boolean; // Whether to allow backward navigation
       canSkip?: boolean; // Whether to allow skipping this step
     };

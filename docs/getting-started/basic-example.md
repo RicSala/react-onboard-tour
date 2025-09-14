@@ -283,10 +283,8 @@ startTour('onboarding');
 
 // Controlling active tour - use useTour
 const tourControls = useTour('onboarding');
-if (tourControls) {
-  tourControls.nextStep();
-  console.log(tourControls.currentStepIndex);
-}
+tourControls.nextStep();
+console.log(tourControls.currentStepIndex);
 ```
 
 ## Advanced Patterns

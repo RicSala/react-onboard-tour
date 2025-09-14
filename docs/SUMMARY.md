@@ -20,13 +20,25 @@
   * [Multi-Page Tours](core-concepts/navigation/multi-page.md)
   * [Auto-Advance](core-concepts/navigation/auto-advance.md) -->
 
+## Features
+
+- [Navigation](features/navigation.md)
+- [Callbacks](features/callbacks.md)
+- [Keyboard Navigation](features/keyboard-navigation.md)
+- [Async steps](features/async-steps.md)
+<!-- - [Validation](features/validation.md)
+- [Localization](features/localization.md)
+- [Auto-advance](features/auto-advance.md)
+- [Blocking overlays](features/blocking-overlays.md)
+- [Helpers](features/helpers.md) -->
+
 ## Components and Props (WIP)
 
-<!-- * [TourProvider](components/tour-provider.md)
-* [TourMachine](components/tour-machine.md)
-* [TourOverlay](components/tour-overlay.md)
-* [DefaultCard](components/default-card.md)
-* [DebugPanel](components/debug-panel.md) -->
+- [TourProvider](components/tour-provider.md)
+- [TourMachine](components/tour-machine.md)
+- [TourOverlay](components/tour-overlay.md)
+- [DefaultCard](components/default-card.md)
+- [DebugPanel](components/debug-panel.md)
 
 ## Customization (WIP)
 
@@ -93,3 +105,7 @@
 - [Testing (WIP)](contributing/testing.md)
 - [Code Style (WIP)](contributing/code-style.md)
 - [Pull Requests (WIP)](contributing/pull-requests.md)
+
+## Next features
+
+- [Next features](next-features.md)

@@ -202,8 +202,6 @@ import { useProductTour, ProductTourStates } from '../tours/product-tour';
 export function ProductPage() {
   const tour = useProductTour();
 
-  if (!tour) return null;
-
   // TypeScript knows all possible states
   const handleStateChange = (state: ProductTourStates) => {
     switch (state) {

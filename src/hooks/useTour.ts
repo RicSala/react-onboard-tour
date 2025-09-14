@@ -39,13 +39,12 @@ export const useTour = <TConfig extends TourConfig>(tourId: string) => {
     [snapshot]
   );
 
-  if (!snapshot || !tourActor) return null;
+  if (!snapshot || !tourActor || tourConfig?.id !== tourId)
+    return inactiveReturn();
 
   const isActive =
     !snapshot?.value ||
     !['idle', 'completed', 'skipped'].includes(snapshot?.value);
-
-  if (tourConfig?.id !== tourId) return inactiveReturn();
 
   return {
     isActive,
