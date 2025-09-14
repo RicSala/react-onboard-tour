@@ -79,16 +79,9 @@
 * [Remix](frameworks/remix.md)
 * [Vite](frameworks/vite.md) -->
 
-## API Reference (WIP)
+## API Reference
 
-<!-- * [Types](api/types.md)
-  * [TourConfig](api/types/tour-config.md)
-  * [TourStep](api/types/tour-step.md)
-  * [TourContext](api/types/tour-context.md)
-  * [BaseTourEvent](api/types/base-tour-event.md)
-  * [CardProps](api/types/card-props.md)
-* [Utilities](api/utilities.md)
-* [Constants](api/constants.md) -->
+- [API Reference](api-reference.md)
 
 ## Examples (WIP)
 
