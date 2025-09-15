@@ -24,6 +24,31 @@ interface TourOverlayProps {
   tourId: string;
 }
 
+// Helper function to find the scrollable parent of an element
+const getScrollableParent = (element: Element): HTMLElement => {
+  let parent: HTMLElement | null = element.parentElement;
+
+  while (parent) {
+    const computedStyle = getComputedStyle(parent);
+    const overflowY = computedStyle.overflowY;
+    const overflowX = computedStyle.overflowX;
+    const isScrollableY = overflowY === 'scroll' || overflowY === 'auto';
+    const isScrollableX = overflowX === 'scroll' || overflowX === 'auto';
+
+    if (
+      (isScrollableY && parent.scrollHeight > parent.clientHeight) ||
+      (isScrollableX && parent.scrollWidth > parent.clientWidth)
+    ) {
+      return parent; // Found a scrollable parent
+    }
+
+    parent = parent.parentElement;
+  }
+
+  // No scrollable parent found, return document.body
+  return document.body;
+};
+
 export const TourOverlay = ({
   customCard,
   onOverlayClick,
@@ -36,6 +61,9 @@ export const TourOverlay = ({
   const tour = useTour(tourId);
   const [elementRect, setElementRect] = useState<DOMRect | null>(null);
   const [viewportElement, setViewportElement] = useState<HTMLElement | null>(
+    null
+  );
+  const [scrollableParent, setScrollableParent] = useState<HTMLElement | null>(
     null
   );
 
@@ -67,18 +95,23 @@ export const TourOverlay = ({
     placement: cardPositioning.side, // Use bottom as base, offset will center it
   });
 
-  // Track viewport element
+  // Track viewport element and its scrollable parent
   useEffect(() => {
     if (viewportId) {
       const viewport = document.getElementById(viewportId);
       if (viewport) {
         setViewportElement(viewport);
+        // Find the scrollable parent (the container with borders/scrollbars)
+        const parent = getScrollableParent(viewport);
+        setScrollableParent(parent);
       } else {
         console.warn(`Viewport element with ID "${viewportId}" not found`);
         setViewportElement(null);
+        setScrollableParent(null);
       }
     } else {
       setViewportElement(null);
+      setScrollableParent(null);
     }
   }, [viewportId]);
 
@@ -172,199 +205,317 @@ export const TourOverlay = ({
   // Check after all hooks
   if (!tour || !tour.isActive) return null;
 
-  // Get viewport dimensions
-  const containerElement = viewportElement || document.body;
+  // Get viewport dimensions - use scrollable parent when available to include padding
+  const containerElement = scrollableParent || viewportElement || document.body;
   const viewportScrollHeight = containerElement.scrollHeight;
   const viewportScrollWidth = containerElement.scrollWidth;
 
   return (
-    <DynamicPortal viewportID={viewportId}>
-      <motion.div
-        data-name='tourista-overlay'
-        initial='hidden'
-        animate='visible'
-        exit='hidden'
-        variants={{
-          hidden: { opacity: 0 },
-          visible: { opacity: 1 },
-        }}
-        transition={{ duration: 0.3, ease: 'easeOut' }}
-        style={{
-          position: 'absolute',
-          top: 0,
-          left: 0,
-          overflow: 'hidden',
-          height: `${viewportScrollHeight}px`,
-          width: `${viewportScrollWidth}px`,
-          zIndex: 997,
-          pointerEvents: 'none',
-        }}
-      >
-        {/* Dark overlay with cutout */}
-        <svg
-          width={viewportScrollWidth}
-          height={viewportScrollHeight}
+    <>
+      {/* Main overlay inside viewport */}
+      <DynamicPortal viewportID={viewportId}>
+        <motion.div
+          data-name='tourista-overlay'
+          initial='hidden'
+          animate='visible'
+          exit='hidden'
+          variants={{
+            hidden: { opacity: 0 },
+            visible: { opacity: 1 },
+          }}
+          transition={{ duration: 0.3, ease: 'easeOut' }}
           style={{
             position: 'absolute',
             top: 0,
             left: 0,
-            pointerEvents: 'none',
-          }}
-        >
-          {elementRect && (
-            <defs>
-              <mask id='smooth-spotlight-mask'>
-                <rect
-                  width={viewportScrollWidth}
-                  height={viewportScrollHeight}
-                  fill='white'
-                />
-                <motion.rect
-                  initial={{
-                    x: cutoutX + cutoutWidth / 2 - 20,
-                    y: cutoutY + cutoutHeight / 2 - 20,
-                    width: 40,
-                    height: 40,
-                    rx: 10,
-                    ry: 10,
-                  }}
-                  animate={{
-                    x: targetElement ? cutoutX : cutoutX + cutoutWidth / 2,
-                    y: targetElement ? cutoutY : cutoutY + cutoutHeight / 2,
-                    width: targetElement ? cutoutWidth : 0,
-                    height: targetElement ? cutoutHeight : 0,
-                    rx: overlayStyles.radius,
-                    ry: overlayStyles.radius,
-                  }}
-                  transition={{ duration: 0.4, ease: 'easeOut' }}
-                  fill='black'
-                />
-              </mask>
-            </defs>
-          )}
-          <rect
-            width={viewportScrollWidth}
-            height={viewportScrollHeight}
-            fill={`rgba(${overlayStyles.colorRgb}, ${overlayStyles.opacity})`}
-            mask='url(#smooth-spotlight-mask)'
-          />
-        </svg>
-
-        {/* Blocking panes to prevent clicks */}
-        <div
-          data-name='tourista-prevent-click-overlay'
-          style={{
-            position: 'absolute',
-            inset: 0,
-            zIndex: 998,
-            pointerEvents: 'none',
+            overflow: 'hidden',
             height: `${viewportScrollHeight}px`,
             width: `${viewportScrollWidth}px`,
+            zIndex: 997,
+            pointerEvents: 'none',
           }}
         >
-          {/* Top overlay */}
-          <div
-            data-name='tourista-prevent-click-overlay-top'
-            onClick={onOverlayClick}
+          {/* Dark overlay with cutout */}
+          <svg
+            width={viewportScrollWidth}
+            height={viewportScrollHeight}
             style={{
               position: 'absolute',
               top: 0,
               left: 0,
-              right: 0,
-              pointerEvents: backdropPointerEvents,
-              height: Math.max(cutoutY, 0),
+              pointerEvents: 'none',
             }}
-          />
+          >
+            {elementRect && (
+              <defs>
+                <mask id='smooth-spotlight-mask'>
+                  <rect
+                    width={viewportScrollWidth}
+                    height={viewportScrollHeight}
+                    fill='white'
+                  />
+                  <motion.rect
+                    initial={{
+                      x: cutoutX + cutoutWidth / 2 - 20,
+                      y: cutoutY + cutoutHeight / 2 - 20,
+                      width: 40,
+                      height: 40,
+                      rx: 10,
+                      ry: 10,
+                    }}
+                    animate={{
+                      x: targetElement ? cutoutX : cutoutX + cutoutWidth / 2,
+                      y: targetElement ? cutoutY : cutoutY + cutoutHeight / 2,
+                      width: targetElement ? cutoutWidth : 0,
+                      height: targetElement ? cutoutHeight : 0,
+                      rx: overlayStyles.radius,
+                      ry: overlayStyles.radius,
+                    }}
+                    transition={{ duration: 0.4, ease: 'easeOut' }}
+                    fill='black'
+                  />
+                </mask>
+              </defs>
+            )}
+            <rect
+              width={viewportScrollWidth}
+              height={viewportScrollHeight}
+              fill={`rgba(${overlayStyles.colorRgb}, ${overlayStyles.opacity})`}
+              mask='url(#smooth-spotlight-mask)'
+            />
+          </svg>
 
-          {/* Bottom overlay */}
+          {/* Blocking panes to prevent clicks */}
           <div
-            data-name='tourista-prevent-click-overlay-bottom'
-            onClick={onOverlayClick}
+            data-name='tourista-prevent-click-overlay'
             style={{
               position: 'absolute',
-              left: 0,
-              right: 0,
-              top: cutoutY + cutoutHeight,
-              pointerEvents: backdropPointerEvents,
-              height: Math.max(
-                viewportScrollHeight - cutoutY - cutoutHeight,
-                0
-              ),
+              zIndex: 998,
+              pointerEvents: 'none',
+              height: `${viewportScrollHeight}px`,
+              width: `${viewportScrollWidth}px`,
             }}
-          />
+          >
+            {/* Top overlay */}
+            <div
+              data-name='tourista-prevent-click-overlay-top'
+              onClick={onOverlayClick}
+              style={{
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                right: 0,
+                pointerEvents: backdropPointerEvents,
+                height: Math.max(cutoutY, 0),
+              }}
+            />
+            {/* Bottom overlay */}
+            <div
+              data-name='tourista-prevent-click-overlay-bottom'
+              onClick={onOverlayClick}
+              style={{
+                position: 'absolute',
+                left: 0,
+                right: 0,
+                top: cutoutY + cutoutHeight,
+                pointerEvents: backdropPointerEvents,
+                height: Math.max(
+                  viewportScrollHeight - cutoutY - cutoutHeight,
+                  0
+                ),
+              }}
+            />
+            {/* Left overlay */}
+            <div
+              data-name='tourista-prevent-click-overlay-left'
+              onClick={onOverlayClick}
+              style={{
+                position: 'absolute',
+                left: 0,
+                top: 0,
+                pointerEvents: backdropPointerEvents,
+                width: Math.max(cutoutX, 0),
+                height: viewportScrollHeight,
+              }}
+            />
+            {/* Right overlay */}
+            <div
+              data-name='tourista-prevent-click-overlay-right'
+              onClick={onOverlayClick}
+              style={{
+                position: 'absolute',
+                top: 0,
+                left: cutoutX + cutoutWidth,
+                pointerEvents: backdropPointerEvents,
+                width: Math.max(viewportScrollWidth - cutoutX - cutoutWidth, 0),
+                height: viewportScrollHeight,
+              }}
+            />
+          </div>
+          {/* Highlighted element reference for floating UI */}
+          {elementRect && (
+            <div
+              data-name='tourista-highlight-reference'
+              className='absolute rounded-lg pointer-events-none'
+              ref={refs.setReference}
+              style={{
+                left: cutoutX,
+                top: cutoutY,
+                width: cutoutWidth,
+                height: cutoutHeight,
+                zIndex: 999,
+              }}
+            />
+          )}
+        </motion.div>
+      </DynamicPortal>
 
-          {/* Left overlay */}
-          <div
-            data-name='tourista-prevent-click-overlay-left'
-            onClick={onOverlayClick}
+      {/* Tooltip Card */}
+      <Card
+        className='absolute z-[999] pointer-events-auto'
+        style={
+          targetElement
+            ? floatingStyles
+            : {
+                position: 'absolute',
+                top: '50%',
+                left: '50%',
+                transform: 'translate(-50%, -50%)',
+              }
+        }
+        title={tour.currentStepData?.title}
+        content={tour.currentStepData?.content}
+        currentStepIndex={tour.currentStepIndex}
+        totalSteps={tour.totalSteps}
+        canGoNext={tour.canGoNext!}
+        canSkip={tour.canSkip!}
+        canGoPrev={tour.canGoPrev!}
+        nextStep={tour.nextStep}
+        prevStep={tour.prevStep}
+        skipTour={tour.skipTour}
+        endTour={tour.endTour}
+        ref={refs.setFloating}
+      />
+
+      {/* Outer overlay for outside of custom viewport - only when viewportID and scrollableParent are available */}
+      {viewportId && scrollableParent && (
+        <DynamicPortal>
+          <motion.div
+            data-name='tourista-outer-overlay'
+            initial='hidden'
+            animate='visible'
+            exit='hidden'
+            variants={{
+              hidden: { opacity: 0 },
+              visible: { opacity: 1 },
+            }}
+            transition={{ duration: 0.3, ease: 'easeOut' }}
             style={{
               position: 'absolute',
-              left: 0,
               top: 0,
-              pointerEvents: backdropPointerEvents,
-              width: Math.max(cutoutX, 0),
-              height: viewportScrollHeight,
+              left: 0,
+              overflow: 'hidden',
+              height: `${document.body.scrollHeight}px`,
+              width: `${document.body.scrollWidth}px`,
+              zIndex: 997,
+              pointerEvents: 'none',
             }}
-          />
-
-          {/* Right overlay */}
-          <div
-            data-name='tourista-prevent-click-overlay-right'
-            onClick={onOverlayClick}
-            style={{
-              position: 'absolute',
-              top: 0,
-              left: cutoutX + cutoutWidth,
-              pointerEvents: backdropPointerEvents,
-              width: Math.max(viewportScrollWidth - cutoutX - cutoutWidth, 0),
-              height: viewportScrollHeight,
-            }}
-          />
-        </div>
-
-        {/* Highlighted element reference for floating UI */}
-        {elementRect && (
-          <div
-            data-name='tourista-highlight-reference'
-            className='absolute rounded-lg pointer-events-none'
-            ref={refs.setReference}
-            style={{
-              left: cutoutX,
-              top: cutoutY,
-              width: cutoutWidth,
-              height: cutoutHeight,
-              zIndex: 999,
-            }}
-          />
-        )}
-
-        {/* Tooltip Card */}
-        <Card
-          className='absolute z-[999] pointer-events-auto'
-          style={
-            targetElement
-              ? floatingStyles
-              : {
+          >
+            {/* Blocking overlay around the scrollable parent to prevent clicks */}
+            <div
+              style={{
+                position: 'absolute',
+                inset: 0,
+                zIndex: 998,
+                pointerEvents: 'none',
+                width: '100vw',
+                height: document.body.scrollHeight,
+              }}
+            >
+              {/* Top overlay */}
+              <div
+                id='external-top-overlay'
+                onClick={onOverlayClick}
+                style={{
                   position: 'absolute',
-                  top: '50%',
-                  left: '50%',
-                  transform: 'translate(-50%, -50%)',
-                }
-          }
-          title={tour.currentStepData?.title}
-          content={tour.currentStepData?.content}
-          currentStepIndex={tour.currentStepIndex}
-          totalSteps={tour.totalSteps}
-          canGoNext={tour.canGoNext!}
-          canSkip={tour.canSkip!}
-          canGoPrev={tour.canGoPrev!}
-          nextStep={tour.nextStep}
-          prevStep={tour.prevStep}
-          skipTour={tour.skipTour}
-          endTour={tour.endTour}
-          ref={refs.setFloating}
-        />
-      </motion.div>
-    </DynamicPortal>
+                  left: 0,
+                  right: 0,
+                  top: 0,
+                  pointerEvents: backdropPointerEvents,
+                  height:
+                    scrollableParent.getBoundingClientRect().top +
+                    window.scrollY,
+                  width: `${document.body.scrollWidth}px`,
+                  backgroundColor: `rgba(${overlayStyles.colorRgb}, ${overlayStyles.opacity})`,
+                }}
+              />
+
+              {/* Bottom overlay */}
+              <div
+                onClick={onOverlayClick}
+                style={{
+                  position: 'absolute',
+                  left: 0,
+                  right: 0,
+                  pointerEvents: backdropPointerEvents,
+                  top: `${
+                    scrollableParent.getBoundingClientRect().bottom +
+                    window.scrollY
+                  }px`,
+                  height: `${
+                    document.body.scrollHeight -
+                    scrollableParent.getBoundingClientRect().bottom -
+                    window.scrollY
+                  }px`,
+                  width: `${document.body.scrollWidth}px`,
+                  backgroundColor: `rgba(${overlayStyles.colorRgb}, ${overlayStyles.opacity})`,
+                }}
+              />
+
+              {/* Left overlay */}
+              <div
+                onClick={onOverlayClick}
+                style={{
+                  position: 'absolute',
+                  pointerEvents: backdropPointerEvents,
+                  left: 0,
+                  top:
+                    scrollableParent.getBoundingClientRect().top +
+                    window.scrollY,
+                  width:
+                    scrollableParent.getBoundingClientRect().left +
+                    window.scrollX,
+                  height: scrollableParent.getBoundingClientRect().height,
+                  backgroundColor: `rgba(${overlayStyles.colorRgb}, ${overlayStyles.opacity})`,
+                }}
+              />
+
+              {/* Right overlay */}
+              <div
+                onClick={onOverlayClick}
+                style={{
+                  position: 'absolute',
+                  pointerEvents: backdropPointerEvents,
+                  top:
+                    scrollableParent.getBoundingClientRect().top +
+                    window.scrollY,
+                  left: `${
+                    scrollableParent.getBoundingClientRect().right +
+                    window.scrollX
+                  }px`,
+                  width: `${
+                    document.body.scrollWidth -
+                    scrollableParent.getBoundingClientRect().right -
+                    window.scrollX
+                  }px`,
+                  height: scrollableParent.getBoundingClientRect().height,
+                  backgroundColor: `rgba(${overlayStyles.colorRgb}, ${overlayStyles.opacity})`,
+                }}
+              />
+            </div>
+          </motion.div>
+        </DynamicPortal>
+      )}
+    </>
   );
 };

@@ -21,9 +21,9 @@ The `TourViewport` component provides a clean, borderless container that ensures
 import { TourViewport } from 'tourista';
 ```
 
-### 2. Wrap Your Scrollable Content
+### 2. Structure Your Layout Correctly
 
-Replace your existing scrollable container:
+The key is to have the scrollable container (with borders, rounded corners, etc.) as the **parent** of TourViewport:
 
 **Before (problematic with tours):**
 ```tsx
@@ -37,12 +37,14 @@ Replace your existing scrollable container:
 
 **After (works perfectly with tours):**
 ```tsx
-<div className="border-2 rounded-lg h-96">
+<div className="border-2 rounded-lg overflow-auto h-96">
   <TourViewport id="content-area">
     <YourContent />
   </TourViewport>
 </div>
 ```
+
+**Important:** The scrollable container (with `overflow-auto`) must be the PARENT of TourViewport, not the TourViewport itself.
 
 ### 3. Reference in Tour Steps
 
@@ -166,11 +168,18 @@ const tourSteps = [
 
 ### Styling Considerations
 
-1. **Apply decorative styles to the parent**: Borders, rounded corners, shadows, etc. should be on the parent element, not the TourViewport.
+1. **Apply decorative styles to the parent**: Borders, rounded corners, shadows, AND scrolling should be on the parent element, not the TourViewport.
 
-2. **TourViewport handles scrolling**: The component creates its own scrollable container internally.
+2. **TourViewport only provides a clean boundary**: It sets `overflow: hidden` to create a clean edge for the overlay system. The parent handles actual scrolling.
 
-3. **Minimum dimensions**: The component sets `minHeight: 100%` and `minWidth: 100%` to fill its parent.
+3. **Structure is critical**: 
+   ```
+   Parent (scrollable, has borders/styling)
+     └── TourViewport (clean boundary, overflow hidden)
+           └── Your content
+   ```
+
+4. **Minimum dimensions**: The component sets `minHeight: 100%` and `minWidth: 100%` to fill its parent.
 
 ### When to Use TourViewport
 
