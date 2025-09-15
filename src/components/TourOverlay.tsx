@@ -110,8 +110,11 @@ export const TourOverlay = ({
         setScrollableParent(null);
       }
     } else {
+      // No custom viewport, but we still need to find the scrollable parent
+      // Start from body and find the actual scrollable container
       setViewportElement(null);
-      setScrollableParent(null);
+      const parent = getScrollableParent(document.body);
+      setScrollableParent(parent);
     }
   }, [viewportId]);
 
@@ -122,37 +125,24 @@ export const TourOverlay = ({
       const element = document.querySelector(targetElement!);
       if (element) {
         const rect = element.getBoundingClientRect();
-
-        if (viewportElement) {
-          // For custom viewport, calculate position relative to viewport
-          const viewportRect = viewportElement.getBoundingClientRect();
-          const viewportScrollX = viewportElement.scrollLeft;
-          const viewportScrollY = viewportElement.scrollTop;
-
-          setElementRect(
-            new DOMRect(
-              rect.left - viewportRect.left + viewportScrollX,
-              rect.top - viewportRect.top + viewportScrollY,
-              rect.width,
-              rect.height
-            )
-          );
-        } else {
-          // For document body, use document coordinates
-          const scrollX =
-            window.pageXOffset || document.documentElement.scrollLeft;
-          const scrollY =
-            window.pageYOffset || document.documentElement.scrollTop;
-
-          setElementRect(
-            new DOMRect(
-              rect.left + scrollX,
-              rect.top + scrollY,
-              rect.width,
-              rect.height
-            )
-          );
-        }
+        
+        // Get the actual container that will hold our overlay
+        const container = viewportElement || scrollableParent || document.body;
+        const containerRect = container.getBoundingClientRect();
+        
+        // Calculate position relative to the container
+        // Add scroll offsets to get the absolute position within the scrollable area
+        const scrollLeft = container.scrollLeft || 0;
+        const scrollTop = container.scrollTop || 0;
+        
+        setElementRect(
+          new DOMRect(
+            rect.left - containerRect.left + scrollLeft,
+            rect.top - containerRect.top + scrollTop,
+            rect.width,
+            rect.height
+          )
+        );
       }
       // Otherwise keep the previous position
     };
@@ -175,16 +165,15 @@ export const TourOverlay = ({
       retryCount++;
     }, 200);
 
+    // Only need resize listener now, no scroll listener needed!
     window.addEventListener('resize', updateRect);
-    window.addEventListener('scroll', updateRect);
 
     return () => {
       clearTimeout(initialTimer);
       clearInterval(retryInterval);
       window.removeEventListener('resize', updateRect);
-      window.removeEventListener('scroll', updateRect);
     };
-  }, [targetElement, tour?.currentState, viewportElement]);
+  }, [targetElement, tour?.currentState, viewportElement, scrollableParent]);
 
   const cutoutX = useMemo(
     () => (!elementRect ? 0 : elementRect.left - overlayStyles.padding),
