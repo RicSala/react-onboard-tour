@@ -6,6 +6,10 @@ Welcome to the documentation for **Tourista** - a state-machine-driven onboardin
 
 Tourista is a React library that creates interactive product tours and onboarding flows. It uses a state machine architecture (built on @tinystack/machine) to manage tour progression, handle multi-page navigation, and support both synchronous and asynchronous tour steps.
 
+### Docs
+
+See the [documentation](https://tinystack.gitbook.io/tourista/getting-started/quick-start) for more information.
+
 ### Key Characteristics
 
 - **🎯 State Machine Based**: Uses finite state machines for predictable tour flow management
@@ -158,7 +162,7 @@ yarn add Tourista
 3. **Define your tour configuration**
 4. **Start the tour programmatically**
 
-See the [Quick Start](getting-started/quick-start.md) guide for detailed setup instructions.
+See the [Quick Start](https://tinystack.gitbook.io/tourista/getting-started/quick-start) guide for detailed setup instructions.
 
 ## Dependencies
 
