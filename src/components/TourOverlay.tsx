@@ -255,6 +255,7 @@ export const TourOverlay = ({
                     fill='white'
                   />
                   <motion.rect
+                    id={`smooth-spotlight-mask-${tourId}`}
                     initial={{
                       x: cutoutX + cutoutWidth / 2 - 20,
                       y: cutoutY + cutoutHeight / 2 - 20,
@@ -377,7 +378,7 @@ export const TourOverlay = ({
           targetElement
             ? floatingStyles
             : {
-                position: 'absolute',
+                position: 'fixed',
                 top: '50%',
                 left: '50%',
                 transform: 'translate(-50%, -50%)',
