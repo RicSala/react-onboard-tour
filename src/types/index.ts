@@ -7,6 +7,7 @@ export type TourContext = {
   targetElement?: string;
   title: string;
   content: string;
+  viewportId?: string;
   autoAdvanceTimer?: any;
 };
 
@@ -59,6 +60,7 @@ export type TourStep =
       targetElement?: string;
       title: string;
       content: string;
+      viewportId?: string; // Optional custom viewport container
       autoAdvance?: number; // milliseconds
       canNext?: boolean; // Whether to allow forward navigation
       canPrev?: boolean; // Whether to allow backward navigation
@@ -73,6 +75,7 @@ export type TourStep =
         processing: StepContent;
         success: StepContent;
       };
+      viewportId?: string; // Optional custom viewport container
       events?: {
         start?: string;
         success?: string;

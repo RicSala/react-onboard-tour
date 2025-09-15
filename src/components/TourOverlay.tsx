@@ -13,6 +13,7 @@ import { CardPositioning, CardProps, OverlayStyles } from '../types';
 import DefaultCard from './DefaultCard';
 import { scrollIfNeeded } from '../helpers/scrollIfNeeded';
 import { motion } from 'motion/react';
+import DynamicPortal from './DynamicPortal';
 
 interface TourOverlayProps {
   customCard?: ComponentType<CardProps>;
@@ -34,9 +35,17 @@ export const TourOverlay = ({
   const Card = customCard || DefaultCard;
   const tour = useTour(tourId);
   const [elementRect, setElementRect] = useState<DOMRect | null>(null);
+  const [viewportElement, setViewportElement] = useState<HTMLElement | null>(
+    null
+  );
 
   const targetElement = useMemo(
     () => tour?.currentStepData?.targetElement,
+    [tour?.currentStepData]
+  );
+
+  const viewportId = useMemo(
+    () => tour?.currentStepData?.viewportId,
     [tour?.currentStepData]
   );
 
@@ -58,12 +67,60 @@ export const TourOverlay = ({
     placement: cardPositioning.side, // Use bottom as base, offset will center it
   });
 
+  // Track viewport element
+  useEffect(() => {
+    if (viewportId) {
+      const viewport = document.getElementById(viewportId);
+      if (viewport) {
+        setViewportElement(viewport);
+      } else {
+        console.warn(`Viewport element with ID "${viewportId}" not found`);
+        setViewportElement(null);
+      }
+    } else {
+      setViewportElement(null);
+    }
+  }, [viewportId]);
+
   useEffect(() => {
     if (!targetElement) return; // Keep the previous position
 
     const updateRect = () => {
       const element = document.querySelector(targetElement!);
-      if (element) setElementRect(element.getBoundingClientRect());
+      if (element) {
+        const rect = element.getBoundingClientRect();
+
+        if (viewportElement) {
+          // For custom viewport, calculate position relative to viewport
+          const viewportRect = viewportElement.getBoundingClientRect();
+          const viewportScrollX = viewportElement.scrollLeft;
+          const viewportScrollY = viewportElement.scrollTop;
+
+          setElementRect(
+            new DOMRect(
+              rect.left - viewportRect.left + viewportScrollX,
+              rect.top - viewportRect.top + viewportScrollY,
+              rect.width,
+              rect.height
+            )
+          );
+        } else {
+          // For document body, use document coordinates
+          const scrollX =
+            window.pageXOffset || document.documentElement.scrollLeft;
+          const scrollY =
+            window.pageYOffset || document.documentElement.scrollTop;
+
+          setElementRect(
+            new DOMRect(
+              rect.left + scrollX,
+              rect.top + scrollY,
+              rect.width,
+              rect.height
+            )
+          );
+        }
+      }
       // Otherwise keep the previous position
     };
 
@@ -94,7 +151,7 @@ export const TourOverlay = ({
       window.removeEventListener('resize', updateRect);
       window.removeEventListener('scroll', updateRect);
     };
-  }, [targetElement, tour?.currentState]);
+  }, [targetElement, tour?.currentState, viewportElement]);
 
   const cutoutX = useMemo(
     () => (!elementRect ? 0 : elementRect.left - overlayStyles.padding),
@@ -116,32 +173,52 @@ export const TourOverlay = ({
   if (!tour || !tour.isActive) return null;
 
   // Get viewport dimensions
-  const viewportElement =
-    //  viewport ||
-    document.body;
-  const viewportScrollHeight = viewportElement.scrollHeight;
-  const viewportScrollWidth = viewportElement.scrollWidth;
+  const containerElement = viewportElement || document.body;
+  const viewportScrollHeight = containerElement.scrollHeight;
+  const viewportScrollWidth = containerElement.scrollWidth;
 
   return (
-    <>
-      {/* Dark overlay with cutout */}
+    <DynamicPortal viewportID={viewportId}>
       <motion.div
+        data-name='tourista-overlay'
+        initial='hidden'
+        animate='visible'
+        exit='hidden'
+        variants={{
+          hidden: { opacity: 0 },
+          visible: { opacity: 1 },
+        }}
+        transition={{ duration: 0.3, ease: 'easeOut' }}
         style={{
-          position: 'fixed',
-          inset: 0,
-          zIndex: 998,
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          overflow: 'hidden',
+          height: `${viewportScrollHeight}px`,
+          width: `${viewportScrollWidth}px`,
+          zIndex: 997,
           pointerEvents: 'none',
         }}
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-        transition={{ duration: 0.3, ease: 'easeOut' }}
       >
-        <svg width='100%' height='100%'>
+        {/* Dark overlay with cutout */}
+        <svg
+          width={viewportScrollWidth}
+          height={viewportScrollHeight}
+          style={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            pointerEvents: 'none',
+          }}
+        >
           {elementRect && (
             <defs>
               <mask id='smooth-spotlight-mask'>
-                <rect width='100%' height='100%' fill='white' />
+                <rect
+                  width={viewportScrollWidth}
+                  height={viewportScrollHeight}
+                  fill='white'
+                />
                 <motion.rect
                   initial={{
                     x: cutoutX + cutoutWidth / 2 - 20,
@@ -165,115 +242,129 @@ export const TourOverlay = ({
               </mask>
             </defs>
           )}
-          <motion.rect
-            width='100%'
-            height='100%'
+          <rect
+            width={viewportScrollWidth}
+            height={viewportScrollHeight}
             fill={`rgba(${overlayStyles.colorRgb}, ${overlayStyles.opacity})`}
             mask='url(#smooth-spotlight-mask)'
           />
         </svg>
+
+        {/* Blocking panes to prevent clicks */}
+        <div
+          data-name='tourista-prevent-click-overlay'
+          style={{
+            position: 'absolute',
+            inset: 0,
+            zIndex: 998,
+            pointerEvents: 'none',
+            height: `${viewportScrollHeight}px`,
+            width: `${viewportScrollWidth}px`,
+          }}
+        >
+          {/* Top overlay */}
+          <div
+            data-name='tourista-prevent-click-overlay-top'
+            onClick={onOverlayClick}
+            style={{
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              right: 0,
+              pointerEvents: backdropPointerEvents,
+              height: Math.max(cutoutY, 0),
+            }}
+          />
+
+          {/* Bottom overlay */}
+          <div
+            data-name='tourista-prevent-click-overlay-bottom'
+            onClick={onOverlayClick}
+            style={{
+              position: 'absolute',
+              left: 0,
+              right: 0,
+              top: cutoutY + cutoutHeight,
+              pointerEvents: backdropPointerEvents,
+              height: Math.max(
+                viewportScrollHeight - cutoutY - cutoutHeight,
+                0
+              ),
+            }}
+          />
+
+          {/* Left overlay */}
+          <div
+            data-name='tourista-prevent-click-overlay-left'
+            onClick={onOverlayClick}
+            style={{
+              position: 'absolute',
+              left: 0,
+              top: 0,
+              pointerEvents: backdropPointerEvents,
+              width: Math.max(cutoutX, 0),
+              height: viewportScrollHeight,
+            }}
+          />
+
+          {/* Right overlay */}
+          <div
+            data-name='tourista-prevent-click-overlay-right'
+            onClick={onOverlayClick}
+            style={{
+              position: 'absolute',
+              top: 0,
+              left: cutoutX + cutoutWidth,
+              pointerEvents: backdropPointerEvents,
+              width: Math.max(viewportScrollWidth - cutoutX - cutoutWidth, 0),
+              height: viewportScrollHeight,
+            }}
+          />
+        </div>
+
+        {/* Highlighted element reference for floating UI */}
+        {elementRect && (
+          <div
+            data-name='tourista-highlight-reference'
+            className='absolute rounded-lg pointer-events-none'
+            ref={refs.setReference}
+            style={{
+              left: cutoutX,
+              top: cutoutY,
+              width: cutoutWidth,
+              height: cutoutHeight,
+              zIndex: 999,
+            }}
+          />
+        )}
+
+        {/* Tooltip Card */}
+        <Card
+          className='absolute z-[999] pointer-events-auto'
+          style={
+            targetElement
+              ? floatingStyles
+              : {
+                  position: 'absolute',
+                  top: '50%',
+                  left: '50%',
+                  transform: 'translate(-50%, -50%)',
+                }
+          }
+          title={tour.currentStepData?.title}
+          content={tour.currentStepData?.content}
+          currentStepIndex={tour.currentStepIndex}
+          totalSteps={tour.totalSteps}
+          canGoNext={tour.canGoNext!}
+          canSkip={tour.canSkip!}
+          canGoPrev={tour.canGoPrev!}
+          nextStep={tour.nextStep}
+          prevStep={tour.prevStep}
+          skipTour={tour.skipTour}
+          endTour={tour.endTour}
+          ref={refs.setFloating}
+        />
       </motion.div>
-
-      {/* Highlighted element */}
-      {elementRect && (
-        <div
-          className='fixed z-40 rounded-lg pointer-events-none'
-          ref={refs.setReference}
-          style={{
-            left: cutoutX,
-            top: cutoutY,
-            width: cutoutWidth,
-            height: cutoutHeight,
-          }}
-        />
-      )}
-
-      {/* Tooltip Card */}
-      <Card
-        className='fixed z-[999] pointer-events-auto'
-        style={
-          targetElement
-            ? floatingStyles
-            : {
-                position: 'fixed',
-                top: '50%',
-                left: '50%',
-                transform: 'translate(-50%, -50%)',
-              }
-        }
-        title={tour.currentStepData?.title}
-        content={tour.currentStepData?.content}
-        currentStepIndex={tour.currentStepIndex}
-        totalSteps={tour.totalSteps}
-        canGoNext={tour.canGoNext!}
-        canSkip={tour.canSkip!}
-        canGoPrev={tour.canGoPrev!}
-        nextStep={tour.nextStep}
-        prevStep={tour.prevStep}
-        skipTour={tour.skipTour}
-        endTour={tour.endTour}
-        ref={refs.setFloating}
-      />
-      {/* Blocking panes */}
-
-      <>
-        {/* Top rectangle */}
-        <div
-          onClick={onOverlayClick}
-          style={{
-            height: Math.max(cutoutY, 0),
-            position: 'fixed',
-            top: 0,
-            left: 0,
-            right: 0,
-            pointerEvents: backdropPointerEvents, // block clicks to anything under the top rectangle
-            zIndex: 997,
-          }}
-        />
-
-        {/* Bottom rectangle */}
-        <div
-          onClick={onOverlayClick}
-          style={{
-            height: Math.max(viewportScrollHeight - cutoutY - cutoutHeight, 0),
-            position: 'fixed',
-            top: cutoutY + cutoutHeight,
-            bottom: 0,
-            left: 0,
-            right: 0,
-            pointerEvents: backdropPointerEvents,
-            zIndex: 997,
-          }}
-        />
-
-        {/* Left rectangle */}
-        <div
-          onClick={onOverlayClick}
-          style={{
-            width: Math.max(cutoutX, 0),
-            position: 'fixed',
-            top: 0,
-            left: 0,
-            bottom: 0,
-            pointerEvents: backdropPointerEvents,
-            zIndex: 997,
-          }}
-        />
-
-        {/* Right rectangle */}
-        <div
-          onClick={onOverlayClick}
-          style={{
-            width: Math.max(viewportScrollWidth - cutoutX - cutoutWidth, 0),
-            position: 'fixed',
-            top: 0,
-            right: 0,
-            bottom: 0,
-            pointerEvents: backdropPointerEvents,
-            zIndex: 997,
-          }}
-        />
-      </>
-    </>
+    </DynamicPortal>
   );
 };

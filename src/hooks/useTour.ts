@@ -34,6 +34,7 @@ export const useTour = <TConfig extends TourConfig>(tourId: string) => {
             title: snapshot.context.title,
             content: snapshot.context.content,
             page: snapshot.context.currentPage,
+            viewportId: snapshot.context.viewportId,
           }
         : null,
     [snapshot]
@@ -101,6 +102,6 @@ export const inactiveReturn = () => {
     prevStep: () => () => {},
     endTour: () => () => {},
     skipTour: () => () => {},
-    sendEvent: (event: any) => () => {},
+    sendEvent: (_event: any) => () => {},
   };
 };

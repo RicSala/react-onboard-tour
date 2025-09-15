@@ -6,6 +6,7 @@ export { TourOverlay } from './components/TourOverlay';
 export { TourConfigViewer } from './components/TourConfigViewer';
 export { DebugPanel } from './components/DebugPanel';
 export { default as DefaultCard } from './components/DefaultCard';
+export { default as TourViewport } from './components/TourViewport';
 
 // Helpers
 export {
