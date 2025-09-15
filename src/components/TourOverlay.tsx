@@ -371,36 +371,9 @@ export const TourOverlay = ({
         </motion.div>
       </DynamicPortal>
 
-      {/* Tooltip Card */}
-      <Card
-        className='absolute z-[999] pointer-events-auto'
-        style={
-          targetElement
-            ? floatingStyles
-            : {
-                position: 'fixed',
-                top: '50%',
-                left: '50%',
-                transform: 'translate(-50%, -50%)',
-              }
-        }
-        title={tour.currentStepData?.title}
-        content={tour.currentStepData?.content}
-        currentStepIndex={tour.currentStepIndex}
-        totalSteps={tour.totalSteps}
-        canGoNext={tour.canGoNext!}
-        canSkip={tour.canSkip!}
-        canGoPrev={tour.canGoPrev!}
-        nextStep={tour.nextStep}
-        prevStep={tour.prevStep}
-        skipTour={tour.skipTour}
-        endTour={tour.endTour}
-        ref={refs.setFloating}
-      />
-
       {/* Outer overlay for outside of custom viewport - only when viewportID and scrollableParent are available */}
-      {viewportId && scrollableParent && (
-        <DynamicPortal>
+      <DynamicPortal>
+        {viewportId && scrollableParent && (
           <motion.div
             data-name='tourista-outer-overlay'
             initial='hidden'
@@ -515,8 +488,34 @@ export const TourOverlay = ({
               />
             </div>
           </motion.div>
-        </DynamicPortal>
-      )}
+        )}
+        {/* Tooltip Card */}
+        <Card
+          className='absolute z-[999] pointer-events-auto'
+          style={
+            targetElement
+              ? floatingStyles
+              : {
+                  position: 'fixed',
+                  top: '50%',
+                  left: '50%',
+                  transform: 'translate(-50%, -50%)',
+                }
+          }
+          title={tour.currentStepData?.title}
+          content={tour.currentStepData?.content}
+          currentStepIndex={tour.currentStepIndex}
+          totalSteps={tour.totalSteps}
+          canGoNext={tour.canGoNext!}
+          canSkip={tour.canSkip!}
+          canGoPrev={tour.canGoPrev!}
+          nextStep={tour.nextStep}
+          prevStep={tour.prevStep}
+          skipTour={tour.skipTour}
+          endTour={tour.endTour}
+          ref={refs.setFloating}
+        />
+      </DynamicPortal>
     </>
   );
 };

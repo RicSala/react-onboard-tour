@@ -1,6 +1,6 @@
 {
   "name": "tourista",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "description": "A flexible onboarding tour library for React applications",
   "repository": {
     "type": "git",
@@ -78,6 +78,7 @@
   "dependencies": {
     "@floating-ui/react": "^0.27.16",
     "@tinystack/machine": "^0.1.0",
-    "motion": "^12.23.12"
+    "motion": "^12.23.12",
+    "tourista": "^0.0.4"
   }
 }
