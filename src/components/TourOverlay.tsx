@@ -14,6 +14,7 @@ import DefaultCard from './DefaultCard';
 import { scrollIfNeeded } from '../helpers/scrollIfNeeded';
 import { motion } from 'motion/react';
 import DynamicPortal from './DynamicPortal';
+import { getScrollableParentOrBody } from '../helpers/getScrollableParent';
 
 interface TourOverlayProps {
   customCard?: ComponentType<CardProps>;
@@ -23,31 +24,6 @@ interface TourOverlayProps {
   cardPositioning: Required<CardPositioning>;
   tourId: string;
 }
-
-// Helper function to find the scrollable parent of an element
-const getScrollableParent = (element: Element): HTMLElement => {
-  let parent: HTMLElement | null = element.parentElement;
-
-  while (parent) {
-    const computedStyle = getComputedStyle(parent);
-    const overflowY = computedStyle.overflowY;
-    const overflowX = computedStyle.overflowX;
-    const isScrollableY = overflowY === 'scroll' || overflowY === 'auto';
-    const isScrollableX = overflowX === 'scroll' || overflowX === 'auto';
-
-    if (
-      (isScrollableY && parent.scrollHeight > parent.clientHeight) ||
-      (isScrollableX && parent.scrollWidth > parent.clientWidth)
-    ) {
-      return parent; // Found a scrollable parent
-    }
-
-    parent = parent.parentElement;
-  }
-
-  // No scrollable parent found, return document.body
-  return document.body;
-};
 
 export const TourOverlay = ({
   customCard,
@@ -99,51 +75,62 @@ export const TourOverlay = ({
   useEffect(() => {
     if (viewportId) {
       const viewport = document.getElementById(viewportId);
-      if (viewport) {
-        setViewportElement(viewport);
-        // Find the scrollable parent (the container with borders/scrollbars)
-        const parent = getScrollableParent(viewport);
-        setScrollableParent(parent);
-      } else {
-        console.warn(`Viewport element with ID "${viewportId}" not found`);
+
+      if (!viewport) {
         setViewportElement(null);
         setScrollableParent(null);
+        return;
       }
-    } else {
-      // No custom viewport, but we still need to find the scrollable parent
-      // Start from body and find the actual scrollable container
-      setViewportElement(null);
-      const parent = getScrollableParent(document.body);
-      setScrollableParent(parent);
-    }
-  }, [viewportId]);
 
+      setViewportElement(viewport);
+      // Find the scrollable parent (the container with scroll)
+      const parent = getScrollableParentOrBody(viewport);
+      setScrollableParent(parent);
+    } else if (targetElement) {
+      // No custom viewport, find scrollable parent from the target element
+      setViewportElement(null);
+      const element = document.querySelector(targetElement);
+
+      if (!element) {
+        return setScrollableParent(document.body);
+      }
+
+      const parent = getScrollableParentOrBody(element);
+      setScrollableParent(parent);
+    } else {
+      // No viewport or target, default to body
+      setViewportElement(null);
+      setScrollableParent(document.body);
+    }
+  }, [viewportId, targetElement, tour.currentStepData]);
+
+  // Update the element rect when the target element changes
   useEffect(() => {
-    if (!targetElement) return; // Keep the previous position
+    if (!targetElement) return; // Keep the previous position so the "spotlight" doesnt move
 
     const updateRect = () => {
       const element = document.querySelector(targetElement!);
-      if (element) {
-        const rect = element.getBoundingClientRect();
-        
-        // Get the actual container that will hold our overlay
-        const container = viewportElement || scrollableParent || document.body;
-        const containerRect = container.getBoundingClientRect();
-        
-        // Calculate position relative to the container
-        // Add scroll offsets to get the absolute position within the scrollable area
-        const scrollLeft = container.scrollLeft || 0;
-        const scrollTop = container.scrollTop || 0;
-        
-        setElementRect(
-          new DOMRect(
-            rect.left - containerRect.left + scrollLeft,
-            rect.top - containerRect.top + scrollTop,
-            rect.width,
-            rect.height
-          )
-        );
-      }
+      if (!element) return;
+      const rect = element.getBoundingClientRect();
+
+      // Get the actual container that will hold our overlay
+      const container = viewportElement || scrollableParent || document.body;
+      const containerRect = container.getBoundingClientRect();
+
+      // Calculate position relative to the container
+      // Add scroll offsets to get the absolute position within the scrollable area
+      const scrollLeft = container.scrollLeft || 0;
+      const scrollTop = container.scrollTop || 0;
+
+      setElementRect(
+        new DOMRect(
+          rect.left - containerRect.left + scrollLeft,
+          rect.top - containerRect.top + scrollTop,
+          rect.width,
+          rect.height
+        )
+      );
+
       // Otherwise keep the previous position
     };
 
@@ -165,7 +152,6 @@ export const TourOverlay = ({
       retryCount++;
     }, 200);
 
-    // Only need resize listener now, no scroll listener needed!
     window.addEventListener('resize', updateRect);
 
     return () => {
@@ -175,6 +161,7 @@ export const TourOverlay = ({
     };
   }, [targetElement, tour?.currentState, viewportElement, scrollableParent]);
 
+  // Cutout relative to the container
   const cutoutX = useMemo(
     () => (!elementRect ? 0 : elementRect.left - overlayStyles.padding),
     [elementRect, overlayStyles.padding]
@@ -198,9 +185,54 @@ export const TourOverlay = ({
   const containerElement = scrollableParent || viewportElement || document.body;
   const viewportScrollHeight = containerElement.scrollHeight;
   const viewportScrollWidth = containerElement.scrollWidth;
+  const hasOutterViewport = viewportId && scrollableParent;
 
   return (
     <>
+      <div
+        className='fixed top-2 left-2 z-[999] bg-white p-2 rounded-md shadow-lg'
+        id='debug-pane'
+        style={{ fontSize: '11px', fontFamily: 'monospace', maxWidth: '350px' }}
+      >
+        <div style={{ marginBottom: '8px' }}>
+          <strong>Target:</strong> {targetElement || 'none'}
+        </div>
+        <div style={{ marginBottom: '8px' }}>
+          <strong>Target Rect within viewport:</strong>
+          <div style={{ paddingLeft: '10px' }}>
+            x: {elementRect?.x?.toFixed(1)}, y: {elementRect?.y?.toFixed(1)}
+            <br />
+            w: {elementRect?.width?.toFixed(1)}, h:{' '}
+            {elementRect?.height?.toFixed(1)}
+          </div>
+        </div>
+        <div style={{ marginBottom: '8px' }}>
+          <strong>Viewport:</strong>{' '}
+          {viewportElement
+            ? `${viewportElement.tagName}#${viewportElement.id}`
+            : 'none'}
+        </div>
+        <div style={{ marginBottom: '8px' }}>
+          <strong>Scrollable Parent:</strong>{' '}
+          {scrollableParent
+            ? `${scrollableParent.tagName}${
+                scrollableParent.id ? '#' + scrollableParent.id : ''
+              }${
+                scrollableParent.className
+                  ? '.' + scrollableParent.className.split(' ')[0]
+                  : ''
+              }`
+            : 'none'}
+          <div style={{ paddingLeft: '10px' }}>
+            scroll: ({scrollableParent?.scrollLeft || 0},{' '}
+            {scrollableParent?.scrollTop || 0})
+          </div>
+        </div>
+        <div>
+          <strong>Container:</strong> {containerElement?.id} (
+          {containerElement.scrollWidth}x{containerElement.scrollHeight})
+        </div>
+      </div>
       {/* Main overlay inside viewport */}
       <DynamicPortal viewportID={viewportId}>
         <motion.div
@@ -212,7 +244,10 @@ export const TourOverlay = ({
             hidden: { opacity: 0 },
             visible: { opacity: 1 },
           }}
-          transition={{ duration: 0.3, ease: 'easeOut' }}
+          transition={{
+            duration: hasOutterViewport ? 0 : 0.3,
+            ease: 'easeOut',
+          }}
           style={{
             position: 'absolute',
             top: 0,
@@ -246,6 +281,7 @@ export const TourOverlay = ({
                   <motion.rect
                     id={`smooth-spotlight-mask-${tourId}`}
                     initial={{
+                      // Start in the center of the cutout, as a 40x40 square
                       x: cutoutX + cutoutWidth / 2 - 20,
                       y: cutoutY + cutoutHeight / 2 - 20,
                       width: 40,
@@ -254,6 +290,7 @@ export const TourOverlay = ({
                       ry: 10,
                     }}
                     animate={{
+                      // If no element, size 0 in the middle of the cutout
                       x: targetElement ? cutoutX : cutoutX + cutoutWidth / 2,
                       y: targetElement ? cutoutY : cutoutY + cutoutHeight / 2,
                       width: targetElement ? cutoutWidth : 0,
@@ -275,9 +312,9 @@ export const TourOverlay = ({
             />
           </svg>
 
-          {/* Blocking panes to prevent clicks */}
+          {/* [Inner] blocking panes to prevent clicks */}
           <div
-            data-name='tourista-prevent-click-overlay'
+            data-name='tourista-inner-overlay'
             style={{
               position: 'absolute',
               zIndex: 998,
@@ -286,9 +323,10 @@ export const TourOverlay = ({
               width: `${viewportScrollWidth}px`,
             }}
           >
-            {/* Top overlay */}
+            {/* Top overlay: From the top of viewport to the top of the cutout */}
             <div
-              data-name='tourista-prevent-click-overlay-top'
+              data-name='tourista-inner-top-overlay'
+              id='inner-top-overlay'
               onClick={onOverlayClick}
               style={{
                 position: 'absolute',
@@ -299,9 +337,10 @@ export const TourOverlay = ({
                 height: Math.max(cutoutY, 0),
               }}
             />
-            {/* Bottom overlay */}
+            {/* Bottom overlay: From the bottom of the cutout to the bottom of the viewport */}
             <div
-              data-name='tourista-prevent-click-overlay-bottom'
+              data-name='tourista-inner-bottom-overlay'
+              id='inner-bottom-overlay'
               onClick={onOverlayClick}
               style={{
                 position: 'absolute',
@@ -315,9 +354,10 @@ export const TourOverlay = ({
                 ),
               }}
             />
-            {/* Left overlay */}
+            {/* Left overlay: From the left of the viewport to the left of the cutout */}
             <div
-              data-name='tourista-prevent-click-overlay-left'
+              data-name='tourista-inner-left-overlay'
+              id='inner-left-overlay'
               onClick={onOverlayClick}
               style={{
                 position: 'absolute',
@@ -328,9 +368,10 @@ export const TourOverlay = ({
                 height: viewportScrollHeight,
               }}
             />
-            {/* Right overlay */}
+            {/* Right overlay: From the right of the cutout to the right of the viewport */}
             <div
-              data-name='tourista-prevent-click-overlay-right'
+              data-name='tourista-inner-right-overlay'
+              id='inner-right-overlay'
               onClick={onOverlayClick}
               style={{
                 position: 'absolute',
@@ -360,9 +401,9 @@ export const TourOverlay = ({
         </motion.div>
       </DynamicPortal>
 
-      {/* Outer overlay for outside of custom viewport - only when viewportID and scrollableParent are available */}
+      {/* Outer overlay for outside of custom viewport */}
       <DynamicPortal>
-        {viewportId && scrollableParent && (
+        {hasOutterViewport && (
           <motion.div
             data-name='tourista-outer-overlay'
             initial='hidden'
@@ -386,18 +427,20 @@ export const TourOverlay = ({
           >
             {/* Blocking overlay around the scrollable parent to prevent clicks */}
             <div
+              data-name='tourista-outer-overlay'
               style={{
                 position: 'absolute',
                 inset: 0,
                 zIndex: 998,
                 pointerEvents: 'none',
-                width: '100vw',
+                width: document.body.scrollWidth,
                 height: document.body.scrollHeight,
               }}
             >
               {/* Top overlay */}
               <div
-                id='external-top-overlay'
+                data-name='tourista-outer-top-overlay'
+                id='outer-top-overlay'
                 onClick={onOverlayClick}
                 style={{
                   position: 'absolute',
@@ -415,6 +458,8 @@ export const TourOverlay = ({
 
               {/* Bottom overlay */}
               <div
+                data-name='tourista-outer-bottom-overlay'
+                id='outer-bottom-overlay'
                 onClick={onOverlayClick}
                 style={{
                   position: 'absolute',
@@ -437,6 +482,8 @@ export const TourOverlay = ({
 
               {/* Left overlay */}
               <div
+                data-name='tourista-outer-left-overlay'
+                id='outer-left-overlay'
                 onClick={onOverlayClick}
                 style={{
                   position: 'absolute',
@@ -455,6 +502,8 @@ export const TourOverlay = ({
 
               {/* Right overlay */}
               <div
+                data-name='tourista-outer-right-overlay'
+                id='outer-right-overlay'
                 onClick={onOverlayClick}
                 style={{
                   position: 'absolute',

@@ -80,7 +80,6 @@ export const useTour = <TConfig extends TourConfig>(tourId: string) => {
         ? tourActor?.send({ type: 'SKIP_TOUR', tourId: tourConfig.id })
         : () => {},
     sendEvent: (event: Omit<ExtractTourEvents<TConfig>, 'tourId'>) => {
-      console.log('sendEvent', event);
       // @ts-expect-error - we want to send any event
       return tourActor?.send({ ...event, tourId: tourConfig.id });
     },
