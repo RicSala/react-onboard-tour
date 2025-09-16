@@ -17,7 +17,7 @@ Before creating bug reports, please check the [existing issues](https://github.c
 
 Before requesting a new feature or asking about implementation:
 
-1. **Check the [README](README.md) and [documentation](https://tinystack.gitbook.io/tourista)** - Your use case might already be supported
+1. **Check the [README](README.md) and [documentation](https://docs.tourista.dev/)** - Your use case might already be supported
 2. **Browse existing issues and discussions** - Someone might have already requested it or found a solution
 3. **Review the examples** in the demo/examples folder to see if a similar pattern exists
 

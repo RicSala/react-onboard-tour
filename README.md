@@ -8,7 +8,7 @@ Tourista is a React library that creates interactive product tours and onboardin
 
 ### Docs
 
-See the [documentation](https://tinystack.gitbook.io/tourista/getting-started/quick-start) for more information.
+See the [documentation](https://docs.tourista.dev/getting-started/quick-start) for more information.
 
 ### Key Characteristics
 
@@ -162,7 +162,7 @@ yarn add Tourista
 3. **Define your tour configuration**
 4. **Start the tour programmatically**
 
-See the [Quick Start](https://tinystack.gitbook.io/tourista/getting-started/quick-start) guide for detailed setup instructions.
+See the [Quick Start](https://docs.tourista.dev/getting-started/quick-start) guide for detailed setup instructions.
 
 ## Dependencies
 
@@ -177,6 +177,10 @@ The library has minimal dependencies:
 - Currently optimized for Next.js App Router (other frameworks coming soon)
 - No built-in accessibility features yet (planned for future releases)
 - No state persistence across page reloads (in development)
+
+## Sponsors
+
+[Gitbook](https://gitbook.com): A platform for creating and managing documentation. They are the ones who host the documentation for Tourista. Thank you!
 
 ## License
 
