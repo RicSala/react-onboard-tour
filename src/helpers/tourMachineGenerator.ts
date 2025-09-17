@@ -38,14 +38,22 @@ function generateBaseTourMachine<
 
   config.steps.forEach((step, stepIndex) => {
     if (step.type === 'async') {
+      // Check if processing content exists
+      const hasProcessingContent = !!step.content.processing;
+
       expandedStates.push(
         { id: `${step.id}_pending`, step, stepIndex, subState: 'pending' },
-        {
-          id: `${step.id}_processing`,
-          step,
-          stepIndex,
-          subState: 'processing',
-        },
+        // Only add processing state if content is provided
+        ...(hasProcessingContent
+          ? [
+              {
+                id: `${step.id}_processing`,
+                step,
+                stepIndex,
+                subState: 'processing' as const,
+              },
+            ]
+          : []),
         { id: `${step.id}_success`, step, stepIndex, subState: 'success' }
       );
     } else {
@@ -90,7 +98,13 @@ function generateBaseTourMachine<
     // Determine content based on whether this is an async sub-state
     let content: StepContent;
     if (step.type === 'async' && subState) {
-      content = step.content[subState];
+      const stepContent = step.content[subState];
+      if (stepContent) {
+        content = stepContent;
+      } else {
+        // Fallback for missing processing content - use pending content
+        content = step.content.pending;
+      }
     } else if (step.type !== 'async') {
       content = {
         targetElement: step.targetElement,
@@ -167,12 +181,28 @@ function generateBaseTourMachine<
 
     // Handle transitions based on state type
     if (step.type === 'async' && subState === 'pending') {
-      // Async pending state - waits for start event
+      // Async pending state - waits for start and/or success events
       const events = step.events || {};
       const startEvent = events.start || `START_${step.id.toUpperCase()}`;
+      const successEvent = events.success || `${step.id.toUpperCase()}_SUCCESS`;
+      const failedEvent = events.failed || `${step.id.toUpperCase()}_FAILED`;
+      const hasProcessingContent = !!step.content.processing;
 
-      state.on[startEvent] = {
-        target: `${step.id}_processing`,
+      // Start event - only if processing state exists
+      if (hasProcessingContent) {
+        state.on[startEvent] = {
+          target: `${step.id}_processing`,
+        };
+      }
+
+      // Success event - can come directly from pending (skip processing)
+      state.on[successEvent] = {
+        target: `${step.id}_success`,
+      };
+
+      // Failed event - back to pending (for retry)
+      state.on[failedEvent] = {
+        target: `${step.id}_pending`,
       };
 
       // Allow going back (check canPrev, defaults to true)
@@ -482,12 +512,14 @@ export function getAsyncTaskInfo(step: TourStep) {
   if (step.type !== 'async') return null;
 
   const events = step.events || {};
+  const hasProcessing = !!step.content.processing;
 
   return {
     taskId: step.id,
+    hasProcessing, // New flag to indicate if processing state exists
     states: {
       pending: `${step.id}_pending`,
-      processing: `${step.id}_processing`,
+      ...(hasProcessing && { processing: `${step.id}_processing` }),
       success: `${step.id}_success`,
     },
     events: {
@@ -725,11 +757,14 @@ export function createTourHelpers<const T extends TourConfig>(config: T) {
       let stepIndex = 0;
       for (const step of config.steps) {
         if (step.type === 'async') {
-          if (
-            stateId === `${step.id}_pending` ||
-            stateId === `${step.id}_processing` ||
-            stateId === `${step.id}_success`
-          ) {
+          const hasProcessing = !!step.content.processing;
+          const matchingStates = [
+            `${step.id}_pending`,
+            ...(hasProcessing ? [`${step.id}_processing`] : []),
+            `${step.id}_success`,
+          ];
+
+          if (matchingStates.includes(stateId)) {
             return stepIndex;
           }
         } else if (stateId === step.id) {

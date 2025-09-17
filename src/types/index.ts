@@ -72,7 +72,7 @@ export type TourStep =
       page: string;
       content: {
         pending: StepContent;
-        processing: StepContent;
+        processing?: StepContent; // Optional - allows direct pending → success flow
         success: StepContent;
       };
       viewportId?: string; // Optional custom viewport container
