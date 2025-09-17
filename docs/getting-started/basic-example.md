@@ -83,14 +83,51 @@ export const appTours: TourConfig[] = [
 ];
 ```
 
-### 2. Root Layout Setup
+### 2. Tour Provider Setup
+
+```tsx
+// app/components/TourProvider.tsx
+'use client';
+
+import { TourProvider as TourProviderComponent, TourMachine } from 'Tourista';
+import { appTours } from './tour-config';
+
+export function TourProvider({ children }: { children: React.ReactNode }) {
+  return (
+    <TourProviderComponent tours={appTours}>
+      <TourMachine
+        onComplete={() => {
+          localStorage.setItem('hasSeenTour', 'true');
+          console.log('Tour completed!');
+        }}
+        onSkip={() => {
+          localStorage.setItem('hasSeenTour', 'true');
+          console.log('Tour skipped');
+        }}
+        closeOnClickOutside={true}
+        overlayStyles={{
+          opacity: 0.7,
+          colorRgb: '0, 0, 0',
+          padding: 8,
+          radius: 8,
+        }}
+        cardPositioning={{
+          floating: true,
+          side: 'bottom',
+          distancePx: 10,
+        }}
+      />
+      {children}
+    </TourProviderComponent>
+  );
+}
+```
+
+### 3. Root Layout Setup
 
 ```tsx
 // app/layout.tsx
-'use client';
-
-import { TourProvider } from 'Tourista';
-import { appTours } from './components/tour-config';
+import { TourProvider } from './components/TourProvider';
 
 export default function RootLayout({
   children,
@@ -100,24 +137,25 @@ export default function RootLayout({
   return (
     <html lang='en'>
       <body>
-        <TourProvider tours={appTours}>{children}</TourProvider>
+        <TourProvider>{children}</TourProvider>
       </body>
     </html>
   );
 }
 ```
 
-### 3. Tour Setup Component
+### 4. Auto-Start Tour Logic (Optional)
+
+If you want to automatically start the tour for new users, create a component:
 
 ```tsx
-// app/components/TourSetup.tsx
+// app/components/AutoStartTour.tsx
 'use client';
 
-import { TourMachine } from 'Tourista';
 import { useEffect } from 'react';
 import { useTourContext } from 'Tourista';
 
-export function TourSetup() {
+export function AutoStartTour() {
   const { startTour } = useTourContext();
 
   useEffect(() => {
@@ -132,52 +170,25 @@ export function TourSetup() {
     }
   }, [startTour]);
 
-  const handleTourComplete = () => {
-    localStorage.setItem('hasSeenTour', 'true');
-    console.log('Tour completed!');
-  };
-
-  const handleTourSkip = () => {
-    localStorage.setItem('hasSeenTour', 'true');
-    console.log('Tour skipped');
-  };
-
-  return (
-    <TourMachine
-      onComplete={handleTourComplete}
-      onSkip={handleTourSkip}
-      closeOnClickOutside={true}
-      overlayStyles={{
-        opacity: 0.7,
-        colorRgb: '0, 0, 0',
-        padding: 8,
-        radius: 8,
-      }}
-      cardPositioning={{
-        floating: true,
-        side: 'bottom',
-        distancePx: 10,
-      }}
-    />
-  );
+  return null; // This component doesn't render anything
 }
 ```
 
-### 4. Home Page Implementation
+### 5. Home Page Implementation
 
 ```tsx
 // app/page.tsx
 'use client';
 
 import { useTourContext } from 'Tourista';
-import { TourSetup } from './components/TourSetup';
+import { AutoStartTour } from './components/AutoStartTour';
 
 export default function HomePage() {
   const { startTour, isActive } = useTourContext();
 
   return (
     <>
-      <TourSetup />
+      <AutoStartTour />
 
       <nav id='main-nav' className='bg-gray-800 text-white p-4'>
         <div className='flex items-center justify-between'>
@@ -203,54 +214,49 @@ export default function HomePage() {
 }
 ```
 
-### 5. Dashboard Page
+### 6. Dashboard Page
 
 ```tsx
 // app/dashboard/page.tsx
 'use client';
 
 import { useTourContext } from 'Tourista';
-import { TourSetup } from '../components/TourSetup';
 
 export default function DashboardPage() {
   const { startTour } = useTourContext();
 
   return (
-    <>
-      <TourSetup />
-
-      <div className='p-8'>
-        <div id='stats-widget' className='bg-white rounded-lg shadow p-6 mb-4'>
-          <h2 className='text-xl font-bold mb-4'>Statistics</h2>
-          <div className='grid grid-cols-3 gap-4'>
-            <div>Total Users: 1,234</div>
-            <div>Active: 456</div>
-            <div>Growth: +12%</div>
-          </div>
-        </div>
-
-        <div
-          id='new-feature'
-          className='bg-green-50 border border-green-200 rounded p-4 mb-4'
-        >
-          <h3>New Feature: Advanced Analytics</h3>
-          <button
-            onClick={() => startTour('feature-tour')}
-            className='mt-2 px-3 py-1 bg-green-500 text-white rounded text-sm'
-          >
-            Learn More
-          </button>
-        </div>
-
-        <div id='user-profile' className='flex items-center space-x-4'>
-          <div className='w-12 h-12 bg-gray-300 rounded-full'></div>
-          <div>
-            <div className='font-semibold'>John Doe</div>
-            <div className='text-sm text-gray-600'>john@example.com</div>
-          </div>
+    <div className='p-8'>
+      <div id='stats-widget' className='bg-white rounded-lg shadow p-6 mb-4'>
+        <h2 className='text-xl font-bold mb-4'>Statistics</h2>
+        <div className='grid grid-cols-3 gap-4'>
+          <div>Total Users: 1,234</div>
+          <div>Active: 456</div>
+          <div>Growth: +12%</div>
         </div>
       </div>
-    </>
+
+      <div
+        id='new-feature'
+        className='bg-green-50 border border-green-200 rounded p-4 mb-4'
+      >
+        <h3>New Feature: Advanced Analytics</h3>
+        <button
+          onClick={() => startTour('feature-tour')}
+          className='mt-2 px-3 py-1 bg-green-500 text-white rounded text-sm'
+        >
+          Learn More
+        </button>
+      </div>
+
+      <div id='user-profile' className='flex items-center space-x-4'>
+        <div className='w-12 h-12 bg-gray-300 rounded-full'></div>
+        <div>
+          <div className='font-semibold'>John Doe</div>
+          <div className='text-sm text-gray-600'>john@example.com</div>
+        </div>
+      </div>
+    </div>
   );
 }
 ```
@@ -361,8 +367,15 @@ export function CustomTourCard({
   );
 }
 
-// Usage
-<TourMachine customCard={CustomTourCard} />;
+// Usage - add to your TourProvider component
+export function TourProvider({ children }: { children: React.ReactNode }) {
+  return (
+    <TourProviderComponent tours={appTours}>
+      <TourMachine customCard={CustomTourCard} />
+      {children}
+    </TourProviderComponent>
+  );
+}
 ```
 
 ### Async Step Example

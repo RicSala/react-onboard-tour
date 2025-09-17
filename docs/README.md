@@ -18,36 +18,50 @@ Tourista is a React library that creates interactive product tours and onboardin
 ## Quick Example
 
 ```tsx
-import { TourProvider, TourMachine } from 'Tourista';
+// components/TourProvider.tsx
+'use client';
+
+import { TourProvider as TourProviderComponent, TourMachine } from 'Tourista';
+
+const tourConfig = {
+  id: 'welcome-tour',
+  steps: [
+    {
+      id: 'welcome',
+      page: '/',
+      targetElement: '#hero-section',
+      title: 'Welcome to Our App!',
+      content: 'Let us show you around the key features.',
+      canSkip: true,
+      canPrev: true,
+    },
+    {
+      id: 'dashboard',
+      page: '/dashboard',
+      targetElement: '#stats-panel',
+      title: 'Your Dashboard',
+      content: 'Track your progress and analytics here.',
+    },
+  ],
+  allowPageNavigation: true, // enable multi-page tours
+  allowSkip: true, // allow users to skip the tour
+};
+
+export function TourProvider({ children }: { children: React.ReactNode }) {
+  return (
+    <TourProviderComponent tours={[tourConfig]}>
+      <TourMachine />
+      {children}
+    </TourProviderComponent>
+  );
+}
+
+// app/layout.tsx
+import { TourProvider } from '@/components/TourProvider';
 
 function App() {
-  const tourConfig = {
-    id: 'welcome-tour',
-    steps: [
-      {
-        id: 'welcome',
-        page: '/',
-        targetElement: '#hero-section',
-        title: 'Welcome to Our App!',
-        content: 'Let us show you around the key features.',
-        canSkip: true,
-        canPrev: true,
-      },
-      {
-        id: 'dashboard',
-        page: '/dashboard',
-        targetElement: '#stats-panel',
-        title: 'Your Dashboard',
-        content: 'Track your progress and analytics here.',
-      },
-    ],
-    allowPageNavigation: true, // enable multi-page tours
-    allowSkip: true, // allow users to skip the tour
-  };
-
   return (
-    <TourProvider tours={[tourConfig]}>
-      <TourMachine />
+    <TourProvider>
       <YourApplication />
     </TourProvider>
   );

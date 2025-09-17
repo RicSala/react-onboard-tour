@@ -53,12 +53,18 @@ useEffect(() => {
 Keyboard navigation works automatically - no configuration needed:
 
 ```tsx
-import { TourMachine } from 'tourista';
+// components/TourProvider.tsx
+'use client';
 
-function App() {
+import { TourProvider as TourProviderComponent, TourMachine } from 'tourista';
+
+export function TourProvider({ children }: { children: React.ReactNode }) {
   return (
-    <TourMachine />
-    // Keyboard navigation is enabled by default
+    <TourProviderComponent tours={tours}>
+      <TourMachine />
+      {/* Keyboard navigation is enabled by default */}
+      {children}
+    </TourProviderComponent>
   );
 }
 ```

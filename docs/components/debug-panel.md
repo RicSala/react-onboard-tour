@@ -16,16 +16,32 @@ Since this is a development tool, you might not need to configure this in produc
 ## Usage
 
 ```tsx
-import { TourProvider, TourMachine, DebugPanel } from 'Tourista';
+// components/TourProvider.tsx
+'use client';
+
+import {
+  TourProvider as TourProviderComponent,
+  TourMachine,
+  DebugPanel,
+} from 'Tourista';
+
+export function TourProvider({ children }: { children: React.ReactNode }) {
+  return (
+    <TourProviderComponent tours={tours}>
+      <TourMachine />
+      {process.env.NODE_ENV === 'development' && (
+        <DebugPanel tourId='onboarding' />
+      )}
+      {children}
+    </TourProviderComponent>
+  );
+}
+
+// app/layout.tsx
+import { TourProvider } from '@/components/TourProvider';
 
 function App() {
-  return (
-    <TourProvider tours={tours}>
-      <TourMachine />
-      <DebugPanel tourId='onboarding' />
-      {/* Your app */}
-    </TourProvider>
-  );
+  return <TourProvider>{/* Your app */}</TourProvider>;
 }
 ```
 
@@ -81,35 +97,47 @@ Automatically detects and displays:
 ### Basic Debug Setup
 
 ```tsx
+// components/TourProvider.tsx
 'use client';
 
-import { TourProvider, TourMachine, DebugPanel } from 'Tourista';
+import {
+  TourProvider as TourProviderComponent,
+  TourMachine,
+  DebugPanel,
+} from 'Tourista';
 
-export function AppWithDebug() {
-  const tours = [
-    {
-      id: 'debug-tour',
-      steps: [
-        {
-          id: 'step1',
-          page: '/',
-          title: 'First Step',
-          content: 'Debug me!',
-        },
-      ],
-    },
-  ];
+const tours = [
+  {
+    id: 'debug-tour',
+    steps: [
+      {
+        id: 'step1',
+        page: '/',
+        title: 'First Step',
+        content: 'Debug me!',
+      },
+    ],
+  },
+];
 
+export function TourProvider({ children }: { children: React.ReactNode }) {
   return (
-    <TourProvider tours={tours}>
+    <TourProviderComponent tours={tours}>
       <TourMachine />
       {/* Only show in development */}
       {process.env.NODE_ENV === 'development' && (
         <DebugPanel tourId='debug-tour' />
       )}
-      {/* Your app */}
-    </TourProvider>
+      {children}
+    </TourProviderComponent>
   );
+}
+
+// app/layout.tsx
+import { TourProvider } from '@/components/TourProvider';
+
+export function AppWithDebug() {
+  return <TourProvider>{/* Your app */}</TourProvider>;
 }
 ```
 

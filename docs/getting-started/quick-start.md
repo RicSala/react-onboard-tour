@@ -48,17 +48,33 @@ const tourConfig = {
 };
 ```
 
-### 2. Add Tour Components to Your App
+### 2. Create Tour Provider Component
 
-In your Next.js app, wrap your application with `TourProvider` and add `TourMachine`:
+Create a custom client component that wraps `TourProvider` and `TourMachine`:
 
 ```tsx
-// app/layout.tsx or your root component
+// components/TourProvider.tsx
 'use client';
 
-import { TourProvider, TourMachine } from 'Tourista';
+import { TourProvider as TourProviderComponent, TourMachine } from 'Tourista';
 
 const tours = [tourConfig]; // Array of tour configurations
+
+export function TourProvider({ children }: { children: React.ReactNode }) {
+  return (
+    <TourProviderComponent tours={tours}>
+      <TourMachine />
+      {children}
+    </TourProviderComponent>
+  );
+}
+```
+
+### 3. Add to Your App Layout
+
+```tsx
+// app/layout.tsx
+import { TourProvider } from '@/components/TourProvider';
 
 export default function RootLayout({
   children,
@@ -68,17 +84,14 @@ export default function RootLayout({
   return (
     <html lang='en'>
       <body>
-        <TourProvider tours={tours}>
-          <TourMachine />
-          {children}
-        </TourProvider>
+        <TourProvider>{children}</TourProvider>
       </body>
     </html>
   );
 }
 ```
 
-### 3. Start the Tour
+### 4. Start the Tour
 
 Use the `useTourContext` hook to start tours programmatically:
 
@@ -99,10 +112,10 @@ export function StartTourButton() {
 Here's a minimal working example:
 
 ```tsx
-// app/tour-demo/page.tsx
+// components/TourProvider.tsx
 'use client';
 
-import { TourProvider, TourMachine, useTourContext } from 'Tourista';
+import { TourProvider as TourProviderComponent, TourMachine } from 'Tourista';
 
 const tourConfig = {
   id: 'demo-tour',
@@ -128,6 +141,21 @@ const tourConfig = {
   allowSkip: true,
 };
 
+export function TourProvider({ children }: { children: React.ReactNode }) {
+  return (
+    <TourProviderComponent tours={[tourConfig]}>
+      <TourMachine />
+      {children}
+    </TourProviderComponent>
+  );
+}
+
+// app/tour-demo/page.tsx
+('use client');
+
+import { useTourContext } from 'Tourista';
+import { TourProvider } from '@/components/TourProvider';
+
 function TourContent() {
   const { startTour } = useTourContext();
 
@@ -146,6 +174,14 @@ function TourContent() {
         <p>This is the feature that will be highlighted</p>
       </div>
     </div>
+  );
+}
+
+export default function TourDemoPage() {
+  return (
+    <TourProvider>
+      <TourContent />
+    </TourProvider>
   );
 }
 ```

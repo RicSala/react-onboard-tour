@@ -104,58 +104,71 @@ Called when a user skips or exits the tour.
 Here's how to use all callbacks together:
 
 ```tsx
-import { TourMachine } from 'tourista';
+// components/TourProvider.tsx
+'use client';
+
+import { TourProvider as TourProviderComponent, TourMachine } from 'tourista';
+
+export function TourProvider({ children }: { children: React.ReactNode }) {
+  return (
+    <TourProviderComponent tours={tours}>
+      <TourMachine
+        onStart={(tourId) => {
+          // Track tour start
+          analytics.track('Tour Started', {
+            tourId,
+            timestamp: new Date().toISOString(),
+          });
+        }}
+        onStepChange={(stepIndex, stepId, tourId) => {
+          // Track progress
+          analytics.track('Tour Step Changed', {
+            tourId,
+            stepIndex,
+            stepId,
+            progress: `${stepIndex + 1}/${totalSteps}`,
+          });
+
+          // Update progress bar
+          setProgress(((stepIndex + 1) / totalSteps) * 100);
+        }}
+        onComplete={(tourId) => {
+          // Mark as complete
+          localStorage.setItem(`tour_${tourId}_completed`, 'true');
+
+          // Track completion
+          analytics.track('Tour Completed', {
+            tourId,
+            completedAt: new Date().toISOString(),
+          });
+
+          // Show success message
+          toast.success('Tour completed! 🎉');
+        }}
+        onSkip={(stepIndex, stepId, tourId) => {
+          // Track skip event
+          analytics.track('Tour Skipped', {
+            tourId,
+            skippedAt: stepIndex,
+            stepId,
+          });
+
+          // Offer to resume
+          if (stepIndex > 0) {
+            showResumePrompt(tourId, stepIndex);
+          }
+        }}
+      />
+      {children}
+    </TourProviderComponent>
+  );
+}
+
+// app/layout.tsx
+import { TourProvider } from '@/components/TourProvider';
 
 function App() {
-  return (
-    <TourMachine
-      onStart={(tourId) => {
-        // Track tour start
-        analytics.track('Tour Started', {
-          tourId,
-          timestamp: new Date().toISOString(),
-        });
-      }}
-      onStepChange={(stepIndex, stepId, tourId) => {
-        // Track progress
-        analytics.track('Tour Step Changed', {
-          tourId,
-          stepIndex,
-          stepId,
-          progress: `${stepIndex + 1}/${totalSteps}`,
-        });
-
-        // Update progress bar
-        setProgress(((stepIndex + 1) / totalSteps) * 100);
-      }}
-      onComplete={(tourId) => {
-        // Mark as complete
-        localStorage.setItem(`tour_${tourId}_completed`, 'true');
-
-        // Track completion
-        analytics.track('Tour Completed', {
-          tourId,
-          completedAt: new Date().toISOString(),
-        });
-
-        // Show success message
-        toast.success('Tour completed! 🎉');
-      }}
-      onSkip={(stepIndex, stepId, tourId) => {
-        // Track skip event
-        analytics.track('Tour Skipped', {
-          tourId,
-          skippedAt: stepIndex,
-          stepId,
-        });
-
-        // Offer to resume
-        if (stepIndex > 0) {
-          showResumePrompt(tourId, stepIndex);
-        }
-      }}
-    />
-  );
+  return <TourProvider>{/* Your app content */}</TourProvider>;
 }
 ```
 
@@ -209,8 +222,15 @@ const tourCallbacks = {
   },
 };
 
-// Use the callbacks
-<TourMachine {...tourCallbacks} />;
+// Use the callbacks in your TourProvider component
+export function TourProvider({ children }: { children: React.ReactNode }) {
+  return (
+    <TourProviderComponent tours={tours}>
+      <TourMachine {...tourCallbacks} />
+      {children}
+    </TourProviderComponent>
+  );
+}
 ```
 
 ## Conditional Logic
@@ -218,31 +238,43 @@ const tourCallbacks = {
 Use callbacks to implement conditional behavior:
 
 ```tsx
-<TourMachine
-  onStepChange={(stepIndex, stepId, tourId) => {
-    // Unlock features as user progresses
-    if (stepId === 'dashboard-intro') {
-      unlockDashboard();
-    }
+// components/TourProvider.tsx
+'use client';
 
-    if (stepId === 'advanced-features') {
-      enableAdvancedMode();
-    }
-  }}
-  onComplete={(tourId) => {
-    // Different actions for different tours
-    switch (tourId) {
-      case 'onboarding':
-        markUserAsOnboarded();
-        redirectToDashboard();
-        break;
-      case 'new-feature':
-        enableFeature();
-        showSuccessNotification();
-        break;
-    }
-  }}
-/>
+import { TourProvider as TourProviderComponent, TourMachine } from 'tourista';
+
+export function TourProvider({ children }: { children: React.ReactNode }) {
+  return (
+    <TourProviderComponent tours={tours}>
+      <TourMachine
+        onStepChange={(stepIndex, stepId, tourId) => {
+          // Unlock features as user progresses
+          if (stepId === 'dashboard-intro') {
+            unlockDashboard();
+          }
+
+          if (stepId === 'advanced-features') {
+            enableAdvancedMode();
+          }
+        }}
+        onComplete={(tourId) => {
+          // Different actions for different tours
+          switch (tourId) {
+            case 'onboarding':
+              markUserAsOnboarded();
+              redirectToDashboard();
+              break;
+            case 'new-feature':
+              enableFeature();
+              showSuccessNotification();
+              break;
+          }
+        }}
+      />
+      {children}
+    </TourProviderComponent>
+  );
+}
 ```
 
 ## Debugging
@@ -250,6 +282,11 @@ Use callbacks to implement conditional behavior:
 Use callbacks for debugging during development:
 
 ```tsx
+// components/TourProvider.tsx
+'use client';
+
+import { TourProvider as TourProviderComponent, TourMachine } from 'tourista';
+
 const debugCallbacks =
   process.env.NODE_ENV === 'development'
     ? {
@@ -273,7 +310,14 @@ const debugCallbacks =
       }
     : {};
 
-<TourMachine {...debugCallbacks} />;
+export function TourProvider({ children }: { children: React.ReactNode }) {
+  return (
+    <TourProviderComponent tours={tours}>
+      <TourMachine {...debugCallbacks} />
+      {children}
+    </TourProviderComponent>
+  );
+}
 ```
 
 ## Important Notes

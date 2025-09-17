@@ -333,7 +333,19 @@ Users can still override automatic positioning:
 Replace default card with custom component:
 
 ```tsx
-<TourMachine customCard={MyCard} />
+// components/TourProvider.tsx
+'use client';
+
+import { TourProvider as TourProviderComponent, TourMachine } from 'Tourista';
+
+export function TourProvider({ children }: { children: React.ReactNode }) {
+  return (
+    <TourProviderComponent tours={tours}>
+      <TourMachine customCard={MyCard} />
+      {children}
+    </TourProviderComponent>
+  );
+}
 ```
 
 That way, you can completely customize the card UI.
@@ -343,11 +355,23 @@ That way, you can completely customize the card UI.
 Hook into tour lifecycle:
 
 ```tsx
-<TourMachine
-  onComplete={handleComplete}
-  onSkip={handleSkip}
-  onNext={handleNext}
-/>
+// components/TourProvider.tsx
+'use client';
+
+import { TourProvider as TourProviderComponent, TourMachine } from 'Tourista';
+
+export function TourProvider({ children }: { children: React.ReactNode }) {
+  return (
+    <TourProviderComponent tours={tours}>
+      <TourMachine
+        onComplete={handleComplete}
+        onSkip={handleSkip}
+        onNext={handleNext}
+      />
+      {children}
+    </TourProviderComponent>
+  );
+}
 ```
 
 Useful for analytics and custom logic.
@@ -358,10 +382,22 @@ Useful for analytics and custom logic.
 Customize overlay and positioning:
 
 ```tsx
-<TourMachine
-  overlayStyles={{ opacity: 0.8 }}
-  cardPositioning={{ side: 'top' }}
-/>
+// components/TourProvider.tsx
+'use client';
+
+import { TourProvider as TourProviderComponent, TourMachine } from 'Tourista';
+
+export function TourProvider({ children }: { children: React.ReactNode }) {
+  return (
+    <TourProviderComponent tours={tours}>
+      <TourMachine
+        overlayStyles={{ opacity: 0.8 }}
+        cardPositioning={{ side: 'top' }}
+      />
+      {children}
+    </TourProviderComponent>
+  );
+}
 ```
 
 ## Future Architecture Considerations

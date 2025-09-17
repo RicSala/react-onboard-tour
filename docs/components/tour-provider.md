@@ -4,8 +4,13 @@ The `TourProvider` component is a React context provider that manages tour state
 
 ## Usage
 
+The TourProvider component must be wrapped in a client component along with TourMachine:
+
 ```tsx
-import { TourProvider } from 'Tourista';
+// components/TourProvider.tsx
+'use client';
+
+import { TourProvider as TourProviderComponent, TourMachine } from 'Tourista';
 
 const tours = [
   {
@@ -18,9 +23,21 @@ const tours = [
   },
 ];
 
+export function TourProvider({ children }: { children: React.ReactNode }) {
+  return (
+    <TourProviderComponent tours={tours}>
+      <TourMachine />
+      {children}
+    </TourProviderComponent>
+  );
+}
+
+// app/layout.tsx
+import { TourProvider } from '@/components/TourProvider';
+
 function App() {
   return (
-    <TourProvider tours={tours}>
+    <TourProvider>
       {/* Your app components */}
     </TourProvider>
   );
@@ -160,9 +177,10 @@ function MyComponent() {
 ## Example with Multiple Tours
 
 ```tsx
+// components/TourProvider.tsx
 'use client';
 
-import { TourProvider, TourMachine } from 'Tourista';
+import { TourProvider as TourProviderComponent, TourMachine } from 'Tourista';
 
 const tours = [
   {
@@ -185,13 +203,20 @@ const tours = [
   },
 ];
 
-export function RootLayout({ children }) {
+export function TourProvider({ children }: { children: React.ReactNode }) {
   return (
-    <TourProvider tours={tours}>
+    <TourProviderComponent tours={tours}>
       <TourMachine />
       {children}
-    </TourProvider>
+    </TourProviderComponent>
   );
+}
+
+// app/layout.tsx
+import { TourProvider } from '@/components/TourProvider';
+
+export function RootLayout({ children }) {
+  return <TourProvider>{children}</TourProvider>;
 }
 ```
 

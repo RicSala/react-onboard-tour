@@ -4,19 +4,31 @@ The `TourMachine` component is the core tour engine that handles state managemen
 
 ## Usage
 
-```tsx
-import { TourProvider, TourMachine } from 'Tourista';
+The TourMachine component should be included within your custom TourProvider wrapper:
 
-function App() {
+```tsx
+// components/TourProvider.tsx
+'use client';
+
+import { TourProvider as TourProviderComponent, TourMachine } from 'Tourista';
+
+export function TourProvider({ children }: { children: React.ReactNode }) {
   return (
-    <TourProvider tours={tours}>
+    <TourProviderComponent tours={tours}>
       <TourMachine
         closeOnClickOutside={true}
         onComplete={() => console.log('Tour completed')}
       />
-      {/* Your app */}
-    </TourProvider>
+      {children}
+    </TourProviderComponent>
   );
+}
+
+// app/layout.tsx
+import { TourProvider } from '@/components/TourProvider';
+
+function App() {
+  return <TourProvider>{/* Your app */}</TourProvider>;
 }
 ```
 
@@ -222,9 +234,10 @@ Handles browser back button - skips the tour if user navigates back.
 ## Complete Example
 
 ```tsx
+// components/TourProvider.tsx
 'use client';
 
-import { TourProvider, TourMachine } from 'Tourista';
+import { TourProvider as TourProviderComponent, TourMachine } from 'Tourista';
 import { CustomTourCard } from './CustomTourCard';
 
 const tours = [
@@ -236,7 +249,7 @@ const tours = [
   },
 ];
 
-export function App() {
+export function TourProvider({ children }: { children: React.ReactNode }) {
   const handleComplete = () => {
     localStorage.setItem('tourCompleted', 'true');
     console.log('Tour completed');
@@ -248,7 +261,7 @@ export function App() {
   };
 
   return (
-    <TourProvider tours={tours}>
+    <TourProviderComponent tours={tours}>
       <TourMachine
         customCard={CustomTourCard}
         closeOnClickOutside={true}
@@ -266,9 +279,16 @@ export function App() {
           colorRgb: '0, 0, 0',
         }}
       />
-      {/* Your app content */}
-    </TourProvider>
+      {children}
+    </TourProviderComponent>
   );
+}
+
+// app/layout.tsx
+import { TourProvider } from '@/components/TourProvider';
+
+export function App() {
+  return <TourProvider>{/* Your app content */}</TourProvider>;
 }
 ```
 
