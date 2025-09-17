@@ -189,50 +189,6 @@ export const TourOverlay = ({
 
   return (
     <>
-      <div
-        className='fixed top-2 left-2 z-[999] bg-white p-2 rounded-md shadow-lg'
-        id='debug-pane'
-        style={{ fontSize: '11px', fontFamily: 'monospace', maxWidth: '350px' }}
-      >
-        <div style={{ marginBottom: '8px' }}>
-          <strong>Target:</strong> {targetElement || 'none'}
-        </div>
-        <div style={{ marginBottom: '8px' }}>
-          <strong>Target Rect within viewport:</strong>
-          <div style={{ paddingLeft: '10px' }}>
-            x: {elementRect?.x?.toFixed(1)}, y: {elementRect?.y?.toFixed(1)}
-            <br />
-            w: {elementRect?.width?.toFixed(1)}, h:{' '}
-            {elementRect?.height?.toFixed(1)}
-          </div>
-        </div>
-        <div style={{ marginBottom: '8px' }}>
-          <strong>Viewport:</strong>{' '}
-          {viewportElement
-            ? `${viewportElement.tagName}#${viewportElement.id}`
-            : 'none'}
-        </div>
-        <div style={{ marginBottom: '8px' }}>
-          <strong>Scrollable Parent:</strong>{' '}
-          {scrollableParent
-            ? `${scrollableParent.tagName}${
-                scrollableParent.id ? '#' + scrollableParent.id : ''
-              }${
-                scrollableParent.className
-                  ? '.' + scrollableParent.className.split(' ')[0]
-                  : ''
-              }`
-            : 'none'}
-          <div style={{ paddingLeft: '10px' }}>
-            scroll: ({scrollableParent?.scrollLeft || 0},{' '}
-            {scrollableParent?.scrollTop || 0})
-          </div>
-        </div>
-        <div>
-          <strong>Container:</strong> {containerElement?.id} (
-          {containerElement.scrollWidth}x{containerElement.scrollHeight})
-        </div>
-      </div>
       {/* Main overlay inside viewport */}
       <DynamicPortal viewportID={viewportId}>
         <motion.div
