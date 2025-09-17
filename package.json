@@ -10,26 +10,21 @@
   "bugs": {
     "url": "https://github.com/RicSala/tourista/issues"
   },
+  "type": "module",
   "main": "./dist/index.js",
-  "module": "./dist/index.mjs",
   "types": "./dist/index.d.ts",
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
-      "import": "./dist/index.mjs",
-      "require": "./dist/index.js"
-    },
-    "./styles": {
-      "import": "./dist/index.css",
-      "require": "./dist/index.css"
+      "import": "./dist/index.js"
     }
   },
   "files": [
     "dist"
   ],
   "scripts": {
-    "build": "tsup src/index.ts --format cjs,esm --dts --clean --no-splitting",
-    "dev": "tsup src/index.ts --format cjs,esm --dts --watch --no-splitting",
+    "build": "tsc --project tsconfig.json",
+    "dev": "tsc --project tsconfig.json --watch",
     "type:check": "tsc --noEmit --pretty",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
@@ -72,7 +67,6 @@
     "eslint-plugin-react-hooks": "^5.2.0",
     "husky": "^9.1.7",
     "next": "^15.5.2",
-    "tsup": "^8.5.0",
     "typescript": "^5.9.2"
   },
   "dependencies": {

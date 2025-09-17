@@ -2,34 +2,40 @@
   "compilerOptions": {
     // JavaScript version to compile to
     "target": "ES2020",
-    
+
     // Available browser/Node APIs
     "lib": ["ES2020", "DOM"],
-    
+
     // Module system for the output
     "module": "ESNext",
-    
+
     // How to resolve modules (node, bundler, etc)
     "moduleResolution": "bundler",
-    
+
     // Support JSX in React 18+ way (no need to import React)
     "jsx": "react-jsx",
-    
+
     // Enable all strict type checking options
     "strict": true,
-    
+
     // Allow default imports from modules with no default export
     "esModuleInterop": true,
-    
+
     // Skip type checking of declaration files (faster builds)
     "skipLibCheck": true,
-    
+
     // Ensure file names are case-consistent
-    "forceConsistentCasingInFileNames": true
+    "forceConsistentCasingInFileNames": true,
+
+    // Output directory for compiled files
+    "outDir": "./dist",
+
+    // Generate .d.ts declaration files
+    "declaration": true
   },
   // Which files to include in compilation
   "include": ["src"],
-  
+
   // Which files to exclude
   "exclude": ["node_modules", "dist"]
 }
